@@ -88,13 +88,30 @@ def test_set_mode_updates_toml(tmp_path):
 def test_set_voice_preset_without_restart(tmp_path, monkeypatch, capsys):
     _write_toml(tmp_path, _sample_toml())
     monkeypatch.setattr(cfg, "_list_voice_presets", lambda _repo: ["M1", "F2"])
-    assert cfg.cmd_set_voice(tmp_path, "F2", restart=False) == 0
+    assert cfg.cmd_set_voice(tmp_path, "F2", restart=False, ensure=False) == 0
     toml_path = tmp_path / ".cursor" / "hooks" / "speak_summary.toml"
     data = cfg._load_cfg(toml_path)
     assert data["voice_type"] == "F2"
     assert data["voice_style"] == ""
     err = capsys.readouterr().err
     assert "daemon_restart_required" in err
+
+
+def test_set_voice_ensure_runs_bootstrap_when_no_assets(tmp_path, monkeypatch):
+    _write_toml(tmp_path, _sample_toml())
+    called: list[Path] = []
+
+    def _fake_bootstrap(repo: Path) -> int:
+        called.append(repo)
+        styles = repo / "assets" / "voice_styles"
+        styles.mkdir(parents=True)
+        (styles / "M1.json").write_text("{}", encoding="utf-8")
+        return 0
+
+    monkeypatch.setattr(cfg, "_run_bootstrap", _fake_bootstrap)
+    monkeypatch.setattr(cfg, "_daemon_restart", lambda _repo: 0)
+    assert cfg.cmd_set_voice(tmp_path, "M1", restart=True, ensure=True) == 0
+    assert called == [tmp_path]
 
 
 def test_set_voice_with_restart_calls_daemon(tmp_path, monkeypatch):
@@ -104,7 +121,7 @@ def test_set_voice_with_restart_calls_daemon(tmp_path, monkeypatch):
     monkeypatch.setattr(
         cfg, "_daemon_restart", lambda repo: called.append(repo) or 0
     )
-    assert cfg.cmd_set_voice(tmp_path, "M1", restart=True) == 0
+    assert cfg.cmd_set_voice(tmp_path, "M1", restart=True, ensure=False) == 0
     assert called == [tmp_path]
 
 
@@ -114,3 +131,58 @@ def test_status_prints_fields(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "lang: en" in out
     assert "enabled: on" in out
+
+
+def test_list_voices_empty_without_ensure(tmp_path, capsys):
+    assert cfg.cmd_list_voices(tmp_path, ensure=False) == 1
+    assert "no voice JSON" in capsys.readouterr().err
+
+
+def test_list_voices_ensure_runs_bootstrap(tmp_path, monkeypatch):
+    called: list[Path] = []
+
+    def _fake_bootstrap(repo: Path) -> int:
+        called.append(repo)
+        styles = repo / "assets" / "voice_styles"
+        styles.mkdir(parents=True)
+        (styles / "M1.json").write_text("{}", encoding="utf-8")
+        return 0
+
+    monkeypatch.setattr(cfg, "_run_bootstrap", _fake_bootstrap)
+    assert cfg.cmd_list_voices(tmp_path, ensure=True) == 0
+    assert called == [tmp_path]
+
+
+def test_voice_picker_lines(capsys, tmp_path):
+    styles = tmp_path / "assets" / "voice_styles"
+    styles.mkdir(parents=True)
+    (styles / "M1.json").write_text("{}", encoding="utf-8")
+    assert cfg.cmd_voice_picker(tmp_path) == 0
+    out = capsys.readouterr().out
+    assert "M1|Upbeat (M1)" in out
+
+
+def test_set_voice_accepts_display_name(tmp_path, monkeypatch):
+    _write_toml(tmp_path, _sample_toml())
+    monkeypatch.setattr(cfg, "_list_voice_presets", lambda _repo: ["M1", "F4"])
+    monkeypatch.setattr(cfg, "_daemon_restart", lambda _repo: 0)
+    assert cfg.cmd_set_voice(tmp_path, "Confident", restart=False, ensure=False) == 0
+    data = cfg._load_cfg(tmp_path / ".cursor" / "hooks" / "speak_summary.toml")
+    assert data["voice_type"] == "F4"
+
+
+def test_lang_picker_lines(capsys):
+    assert cfg.cmd_lang_picker() == 0
+    out = capsys.readouterr().out
+    assert "en|English" in out
+    assert "other|Other" in out
+
+
+def test_speed_picker_lines(capsys):
+    assert cfg.cmd_speed_picker() == 0
+    assert "1.05|Default" in capsys.readouterr().out
+
+
+def test_list_langs_includes_fr(capsys):
+    assert cfg.cmd_list_langs() == 0
+    assert "fr" in capsys.readouterr().out.split()

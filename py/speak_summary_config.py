@@ -11,6 +11,12 @@ import sys
 from pathlib import Path
 
 from helper import AVAILABLE_LANGS
+from voice_presets import (
+    DEFAULT_VOICE_ORDER,
+    resolve_voice_preset_id,
+    voice_display_name,
+    voice_picker_line,
+)
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -20,6 +26,10 @@ else:
 _SPEED_MIN = 0.5
 _SPEED_MAX = 2.0
 _MODES = frozenset({"queue", "interrupt"})
+# Supertonic-3 voice_style stems (used before assets are downloaded).
+_DEFAULT_VOICE_PRESETS = frozenset(
+    {f"F{i}" for i in range(1, 6)} | {f"M{i}" for i in range(1, 6)}
+)
 
 
 def _repo_root(explicit: Path | None) -> Path:
@@ -93,6 +103,10 @@ def _resolve_voice_arg(repo: Path, arg: str) -> tuple[str, str]:
     raw = arg.strip()
     if not raw:
         raise ValueError("voice argument is empty")
+    if "/" not in raw and not raw.endswith(".json"):
+        by_name = resolve_voice_preset_id(raw)
+        if by_name:
+            raw = by_name
     if "/" in raw or raw.endswith(".json"):
         style = raw if raw.endswith(".json") else f"{raw}.json"
         if not style.startswith("../") and not style.startswith("/"):
@@ -100,10 +114,10 @@ def _resolve_voice_arg(repo: Path, arg: str) -> tuple[str, str]:
         return ("M1", style)
     preset = raw.removesuffix(".json")
     presets = _list_voice_presets(repo)
-    if presets and preset not in presets:
-        raise ValueError(
-            f"unknown voice preset {preset!r}; available: {', '.join(presets)}"
-        )
+    known = set(presets) | _DEFAULT_VOICE_PRESETS
+    if preset not in known:
+        hint = ", ".join(presets) if presets else ", ".join(sorted(_DEFAULT_VOICE_PRESETS))
+        raise ValueError(f"unknown voice preset {preset!r}; available: {hint}")
     return (preset, "")
 
 
@@ -141,7 +155,7 @@ def cmd_status(repo: Path) -> int:
     print(f"lang: {lang}")
     print(f"speed: {speed}")
     print(f"mode: {mode}")
-    print(f"voice_type: {vt}")
+    print(f"voice_type: {vt} ({voice_display_name(vt)})")
     print(f"voice_style: {vs or '(empty, uses voice_type)'}")
     print("hook_keys_no_restart: lang, speed, mode, enabled, heuristics, quiet_hours")
     print("daemon_restart_needed_for: voice_style, voice_type, port, onnx_dir, use_gpu")
@@ -199,7 +213,11 @@ def cmd_set_mode(repo: Path, value: str) -> int:
     return 0
 
 
-def cmd_set_voice(repo: Path, arg: str, *, restart: bool) -> int:
+def cmd_set_voice(repo: Path, arg: str, *, restart: bool, ensure: bool) -> int:
+    if ensure and not _list_voice_presets(repo):
+        rc = _run_bootstrap(repo)
+        if rc != 0:
+            return rc
     try:
         voice_type, voice_style = _resolve_voice_arg(repo, arg)
     except ValueError as e:
@@ -213,7 +231,10 @@ def cmd_set_voice(repo: Path, arg: str, *, restart: bool) -> int:
     else:
         text = _replace_key(text, "voice_style", '""')
     toml_path.write_text(text, encoding="utf-8")
-    print(f"voice_type={voice_type} voice_style={voice_style or '(empty)'}")
+    print(
+        f"voice={voice_display_name(voice_type)} ({voice_type}) "
+        f"voice_style={voice_style or '(empty)'}"
+    )
     print("daemon_restart_required: true", file=sys.stderr)
     if restart:
         print("restarting daemon...", file=sys.stderr)
@@ -225,12 +246,97 @@ def cmd_set_voice(repo: Path, arg: str, *, restart: bool) -> int:
     return 0
 
 
-def cmd_list_voices(repo: Path) -> int:
+def _run_bootstrap(repo: Path) -> int:
+    script = repo / "scripts" / "bootstrap.sh"
+    if not script.is_file():
+        print(f"error: missing {script}", file=sys.stderr)
+        return 1
+    env = {**os.environ, "SKIP_WEB": "1"}
+    print("fetching assets (bootstrap)…", file=sys.stderr)
+    proc = subprocess.run(["bash", str(script)], cwd=str(repo), env=env)
+    return proc.returncode
+
+
+def cmd_list_voices(repo: Path, *, ensure: bool) -> int:
+    if ensure and not _list_voice_presets(repo):
+        rc = _run_bootstrap(repo)
+        if rc != 0:
+            return rc
     presets = _list_voice_presets(repo)
     if not presets:
-        print("no voice JSON files under assets/voice_styles/ (run scripts/bootstrap.sh)")
-        return 0
+        print(
+            "no voice JSON files under assets/voice_styles/ "
+            "(run: bash scripts/bootstrap.sh)",
+            file=sys.stderr,
+        )
+        return 1
     print(" ".join(presets))
+    return 0
+
+
+def _ordered_presets(repo: Path) -> list[str]:
+    on_disk = set(_list_voice_presets(repo))
+    if not on_disk:
+        return list(DEFAULT_VOICE_ORDER)
+    ordered = [p for p in DEFAULT_VOICE_ORDER if p in on_disk]
+    ordered.extend(sorted(on_disk - set(ordered)))
+    return ordered
+
+
+def cmd_voice_picker(repo: Path) -> int:
+    """Print id|label lines for Agent AskQuestion (Supertonic display names)."""
+    for pid in _ordered_presets(repo):
+        print(voice_picker_line(pid))
+    return 0
+
+
+def cmd_list_langs() -> int:
+    print(" ".join(AVAILABLE_LANGS))
+    return 0
+
+
+# Curated labels for interactive pickers (codes must stay in AVAILABLE_LANGS).
+_LANG_PICKER: tuple[tuple[str, str], ...] = (
+    ("en", "English (en)"),
+    ("fr", "French (fr)"),
+    ("de", "German (de)"),
+    ("es", "Spanish (es)"),
+    ("it", "Italian (it)"),
+    ("pt", "Portuguese (pt)"),
+    ("ja", "Japanese (ja)"),
+    ("ko", "Korean (ko)"),
+    ("ar", "Arabic (ar)"),
+    ("hi", "Hindi (hi)"),
+    ("ru", "Russian (ru)"),
+    ("nl", "Dutch (nl)"),
+    ("pl", "Polish (pl)"),
+    ("tr", "Turkish (tr)"),
+    ("vi", "Vietnamese (vi)"),
+)
+
+
+def cmd_lang_picker() -> int:
+    """Print id|label lines for Agent AskQuestion (common languages only)."""
+    for code, label in _LANG_PICKER:
+        if code in AVAILABLE_LANGS:
+            print(f"{code}|{label}")
+    print("other|Other language (you will type the code)")
+    return 0
+
+
+_SPEED_PICKER: tuple[tuple[str, str], ...] = (
+    ("0.9", "Slower (0.9)"),
+    ("1.0", "Normal (1.0)"),
+    ("1.05", "Default (1.05)"),
+    ("1.1", "Slightly faster (1.1)"),
+    ("1.2", "Faster (1.2)"),
+    ("1.5", "Fast (1.5)"),
+)
+
+
+def cmd_speed_picker() -> int:
+    for value, label in _SPEED_PICKER:
+        print(f"{value}|{label}")
     return 0
 
 
@@ -248,7 +354,28 @@ def main() -> int:
 
     sub.add_parser("status", help="Print current TOML settings")
 
-    p_voices = sub.add_parser("voices", help="List voice_type presets from assets/voice_styles/")
+    p_voices = sub.add_parser(
+        "voices", help="List voice_type presets from assets/voice_styles/"
+    )
+    p_voices.add_argument(
+        "--ensure",
+        action="store_true",
+        help="Run scripts/bootstrap.sh if no voice JSON files are present",
+    )
+
+    sub.add_parser("langs", help="Print all supported lang codes (space-separated)")
+    sub.add_parser(
+        "voice-picker",
+        help="Print id|label lines for voice presets (Upbeat (M1), …)",
+    )
+    sub.add_parser(
+        "lang-picker",
+        help="Print id|label lines for common languages (for interactive pickers)",
+    )
+    sub.add_parser(
+        "speed-picker",
+        help="Print id|label lines for common speed values",
+    )
 
     p_set = sub.add_parser("set", help="Update one setting")
     set_sub = p_set.add_subparsers(dest="setting", required=True)
@@ -269,18 +396,37 @@ def main() -> int:
         action="store_true",
         help="Restart tts_daemon after updating voice",
     )
+    p_voice.add_argument(
+        "--ensure",
+        action="store_true",
+        help="Run bootstrap if assets/voice_styles/*.json are missing",
+    )
 
     args = parser.parse_args()
     repo = _repo_root(args.repo_root)
     toml_path = _toml_path(repo)
-    if args.command != "voices" and not toml_path.is_file():
+    if args.command not in (
+        "voices",
+        "voice-picker",
+        "langs",
+        "lang-picker",
+        "speed-picker",
+    ) and not toml_path.is_file():
         print(f"error: missing {toml_path}", file=sys.stderr)
         return 1
 
     if args.command == "status":
         return cmd_status(repo)
     if args.command == "voices":
-        return cmd_list_voices(repo)
+        return cmd_list_voices(repo, ensure=args.ensure)
+    if args.command == "voice-picker":
+        return cmd_voice_picker(repo)
+    if args.command == "langs":
+        return cmd_list_langs()
+    if args.command == "lang-picker":
+        return cmd_lang_picker()
+    if args.command == "speed-picker":
+        return cmd_speed_picker()
     if args.setting == "lang":
         return cmd_set_lang(repo, args.code)
     if args.setting == "speed":
@@ -288,7 +434,9 @@ def main() -> int:
     if args.setting == "mode":
         return cmd_set_mode(repo, args.value)
     if args.setting == "voice":
-        return cmd_set_voice(repo, args.value, restart=args.restart)
+        return cmd_set_voice(
+            repo, args.value, restart=args.restart, ensure=args.ensure
+        )
     return 1
 
 

@@ -1,14 +1,23 @@
 ---
 name: aftertone-mode
-description: Set Aftertone TTS queue mode (queue or interrupt)
+description: Pick Aftertone TTS queue mode (queue or interrupt)
 ---
 
-If the user did not specify, ask: **`queue`** (wait for current speech) or **`interrupt`** (stop and speak new line).
+## Speed rule (required)
 
-Run **only** from the **repository root** (replace `MODE` with `queue` or `interrupt`):
+**Do not** plan or run shell first (unless the user said `queue` or `interrupt`).
+
+Your **first** tool call must be **AskQuestion**:
+
+| id | label |
+|----|-------|
+| queue | queue — wait for current speech |
+| interrupt | interrupt — stop and speak new line |
+
+## Apply
 
 ```bash
 uv run --directory py python speak_summary_config.py set mode MODE
 ```
 
-Report stdout. No daemon restart needed.
+No daemon restart. Report stdout only.

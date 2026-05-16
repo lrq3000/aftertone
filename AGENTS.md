@@ -6,14 +6,14 @@
 - **`.cursor/hooks.json`** — Cursor adapter; must include `"version": 1`.
 - **`.cursor/hooks/`** — `speak_summary.sh`, `speak_summary.toml`, `README.md` (full TOML reference), `hook_payload_trace.sh`.
 - **`py/`** — `tts_daemon.py`, `tts_daemon_ctl.py`, `speak_summary_prepare.py`, `speak_summary_toggle.py` (flip `enabled` in TOML), `speak_summary_config.py` (lang/speed/mode/voice), vendored `helper.py` (Supertonic), `tts_io.py`, `fetch_assets.py`, diagnostics.
-- **`.cursor/commands/`** — slash commands (`/aftertone-toggle`, `/aftertone-lang`, …) instruct Agent to run the toggle/config CLIs; do not hand-edit TOML when the user invoked a command.
+- **`.cursor/commands/`** — **only user-facing way** to change spoken-TTS settings (`/aftertone-toggle`, `/aftertone-lang`, …). Agent runs `speak_summary_toggle.py` / `speak_summary_config.py`; do not hand-edit TOML or suggest VS Code tasks for config.
 - **`scripts/bootstrap.sh`** — `uv sync` + HF snapshot if ONNX dir missing.
 
 ## Commands
 
 - Bootstrap: `bash scripts/bootstrap.sh` from repo root.
 - Daemon: `cd py && uv run python tts_daemon_ctl.py start --repo-root ..`
-- Spoken TTS on/off: `uv run --directory py python speak_summary_toggle.py {on|off|toggle|status}` — or Cursor task **Aftertone: toggle spoken TTS** (see [README.md](README.md#turn-spoken-tts-on-or-off)). Config: `uv run --directory py python speak_summary_config.py {status|set …}` — or slash `/aftertone-*` in [`.cursor/commands/`](.cursor/commands/). Open the **repo root** as the Cursor workspace so `.vscode/tasks.json` and commands are visible (opening only `py/` still works for hooks via [py/.cursor/hooks.json](py/.cursor/hooks.json) if present).
+- **User config:** slash `/aftertone-*` only ([`.cursor/commands/`](.cursor/commands/)). When the user wants to change TTS settings, run the matching command’s scripts — do not tell them to edit TOML or use terminal CLIs directly. **lang/speed/mode/voice** without a value: **AskQuestion** first (see each command file); **voice** uses `set voice … --restart --ensure`. Open the **repo root** as the workspace so commands load (opening only `py/` still works for hooks via [py/.cursor/hooks.json](py/.cursor/hooks.json) if present).
 - Tests: `cd py && uv sync && uv run pytest` — `py/tests/` (integration tests run `speak_summary_prepare.py` with temp TOML; unit tests cover helpers including quiet hours).
 - `uv run` examples: `cd py` first, or `uv run --directory py …` from repo root.
 

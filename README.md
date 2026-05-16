@@ -41,36 +41,25 @@ bash scripts/bootstrap.sh
 - **Smoke (needs assets + audio):** `bash py/test_speak_summary_pipeline.sh`
 - **Diagnostics:** `bash py/diagnose_speak_hooks.sh`
 
-### Turn spoken TTS on or off
+### Control (Cursor slash commands only)
 
-Spoken summaries use **`enabled`** in [`.cursor/hooks/speak_summary.toml`](.cursor/hooks/speak_summary.toml). The hook reads it on **every** agent reply — **no daemon restart**.
+Open this repo as the workspace root. In **Agent** chat, type **`/`** and pick an **`aftertone-`** command. That is the **only** supported way to change spoken-TTS settings (`enabled`, language, speed, mode, voice). Do not edit [`.cursor/hooks/speak_summary.toml`](.cursor/hooks/speak_summary.toml) by hand — each command runs the repo scripts for you.
 
-| Goal | What to do |
-|------|------------|
-| **Off** (no speech after replies) | `cd py && uv run python speak_summary_toggle.py off` — or set `enabled = false` in the TOML |
-| **On** | `cd py && uv run python speak_summary_toggle.py on` — or `enabled = true` |
-| **Flip** | `uv run --directory py python speak_summary_toggle.py toggle` |
-| **Check** | `uv run --directory py python speak_summary_toggle.py status` → prints `on` or `off` |
-
-**In Cursor:** open this repo as the workspace root → **Terminal → Run Task…** → **Aftertone: toggle spoken TTS** (tasks live in [`.vscode/tasks.json`](.vscode/tasks.json)). Bind a keyboard shortcut via **Keyboard Shortcuts** if you want one key to flip it.
-
-### Control with Cursor slash commands
-
-Project commands live in [`.cursor/commands/`](.cursor/commands/). In **Agent** chat, type `/` and pick an **aftertone-** command. Each command tells the agent to run a fixed script (not hand-edit TOML).
+For **lang**, **speed**, **mode**, and **voice**, you get a **picker** first, then the agent applies your choice (voice changes also restart the daemon when needed).
 
 | Command | What it does |
 |---------|----------------|
 | `/aftertone-toggle` | Flip spoken TTS on/off |
 | `/aftertone-on` / `/aftertone-off` | Force on or off |
-| `/aftertone-status` | Show TOML settings + daemon status |
-| `/aftertone-lang` | Set `lang` and sync [spoken-summary rule](.cursor/rules/spoken-summary.mdc) |
-| `/aftertone-speed` | Set playback speed |
-| `/aftertone-mode` | Set `queue` or `interrupt` |
-| `/aftertone-voice` | Set voice preset (restarts daemon with `--restart`) |
+| `/aftertone-status` | Current settings + daemon health |
+| `/aftertone-lang` | Pick language (syncs [spoken-summary rule](.cursor/rules/spoken-summary.mdc)) |
+| `/aftertone-speed` | Pick playback speed |
+| `/aftertone-mode` | Pick `queue` or `interrupt` |
+| `/aftertone-voice` | Pick voice by name (e.g. Confident, Upbeat) → restart daemon |
 
-CLI equivalents (repo root): `uv run --directory py python speak_summary_config.py status` and `set lang|speed|mode|voice …`. See [py/README.md](py/README.md).
+Command definitions: [`.cursor/commands/`](.cursor/commands/).
 
-Turning **`enabled`** off only stops new `/say` requests; the daemon may still be running. To unload models and free resources: `cd py && uv run python tts_daemon_ctl.py stop --repo-root ..`.
+**Daemon (start/stop, not everyday config):** `cd py && uv run python tts_daemon_ctl.py {start|stop|status|restart} --repo-root ..` — see [`.cursor/hooks/README.md`](.cursor/hooks/README.md). Turning TTS **off** via `/aftertone-off` does not unload models; use **stop** when you want silence and no GPU/RAM use.
 
 Full TOML reference: [`.cursor/hooks/README.md`](.cursor/hooks/README.md).
 

@@ -4,29 +4,22 @@ This folder holds the **Cursor hook** scripts, **`hooks.json`**, and **`speak_su
 
 ---
 
-## Toggle spoken TTS from Cursor (no daemon restart)
+## Change settings (slash commands only)
 
-`enabled` in `speak_summary.toml` is read on **every** agent reply. Flip it without editing the file by hand:
+Use **Agent** chat slash commands in [`../commands/`](../commands/) — do **not** hand-edit this TOML for everyday changes.
 
-```bash
-cd py && uv run python speak_summary_toggle.py toggle   # or: on | off | status
-```
+| Command | Setting |
+|---------|---------|
+| `/aftertone-toggle`, `/aftertone-on`, `/aftertone-off` | `enabled` (no daemon restart) |
+| `/aftertone-lang` | `lang` + sync [spoken-summary rule](../rules/spoken-summary.mdc) |
+| `/aftertone-speed` | `speed` |
+| `/aftertone-mode` | `mode` (`queue` / `interrupt`) |
+| `/aftertone-voice` | `voice_type` (friendly names like Confident → `F4`; **daemon restart**) |
+| `/aftertone-status` | Read current values + daemon |
 
-**In the IDE:** **Terminal → Run Task…** → **Aftertone: toggle spoken TTS** (see [`.vscode/tasks.json`](../../.vscode/tasks.json)). Bind a shortcut under **Keyboard Shortcuts** → search `Tasks: Run Task` or assign a key to that task name.
+`enabled`, `lang`, `speed`, and `mode` apply on the **next** hook run. **Voice** / **port** / **onnx_dir** / **use_gpu** need a **daemon restart** (the voice command does that for you).
 
-**Slash commands (Agent chat):** [`../commands/`](../commands/) — type `/aftertone-toggle`, `/aftertone-lang`, `/aftertone-voice`, etc. The agent runs `speak_summary_toggle.py` or `speak_summary_config.py` for you. Tasks are better for a silent one-key flip; slash commands are better for “set language to French” with a short chat instruction.
-
-**Configure lang / speed / mode / voice** (hook reads on next reply; voice needs daemon restart):
-
-```bash
-uv run --directory py python speak_summary_config.py status
-uv run --directory py python speak_summary_config.py set lang fr
-uv run --directory py python speak_summary_config.py set speed 1.1
-uv run --directory py python speak_summary_config.py set mode interrupt
-uv run --directory py python speak_summary_config.py set voice M1 --restart
-```
-
-Cursor does not ship a dedicated Aftertone status-bar widget; tasks + slash commands cover most control. Turning TTS off does not stop the daemon; use `tts_daemon_ctl.py stop` if you want silence and no loaded models.
+Turning TTS off does not stop the daemon; use **`tts_daemon_ctl.py stop`** below if you want no loaded models.
 
 ---
 
@@ -107,7 +100,8 @@ Paths like `../assets/...` are **relative to `py/`** (because the daemon is star
 ### `voice_type`
 
 - **Meaning:** Short preset id for the voice JSON under `assets/voice_styles/`. Used **only when** `voice_style` is empty or whitespace.
-- **Type:** String, e.g. `M1`, `F2`. If the value does not end with `.json`, **`.json` is appended** and resolved as `../assets/voice_styles/<name>.json` from `py/`.
+- **Type:** String, e.g. `M1`, `F2`. Friendly names (Upbeat, Confident, …) appear in `/aftertone-voice` — see `py/voice_presets.py`.
+- If the value does not end with `.json`, **`.json` is appended** and resolved as `../assets/voice_styles/<name>.json` from `py/`.
 - **Restart?** **Yes** (voice loaded at daemon start).
 - **Discover presets:** After assets are installed:  
   `ls "$(git rev-parse --show-toplevel 2>/dev/null || pwd)/assets/voice_styles"/*.json`  

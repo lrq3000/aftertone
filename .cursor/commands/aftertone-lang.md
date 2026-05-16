@@ -1,14 +1,41 @@
 ---
 name: aftertone-lang
-description: Set Aftertone spoken-summary language (lang in TOML + sync agent rule)
+description: Pick Aftertone spoken-summary language and sync the agent rule
 ---
 
-The user wants to change **`lang`** for spoken summaries. If they did not give a language code, ask once for a code (e.g. `en`, `fr`, `ja`). Supported codes are in `py/helper.py` `AVAILABLE_LANGS`.
+## Speed rule (required)
 
-Run **only** from the **repository root** (replace `CODE` with the chosen code):
+**Do not** plan, explain, or run shell before the user picks (unless they gave a code in this message, e.g. `/aftertone-lang fr`).
+
+Your **first** tool call must be **AskQuestion**.
+
+## Picker options (first tool call)
+
+`allow_multiple: false`. Options:
+
+- en — English (en)
+- fr — French (fr)
+- de — German (de)
+- es — Spanish (es)
+- it — Italian (it)
+- pt — Portuguese (pt)
+- ja — Japanese (ja)
+- ko — Korean (ko)
+- ar — Arabic (ar)
+- hi — Hindi (hi)
+- ru — Russian (ru)
+- nl — Dutch (nl)
+- pl — Polish (pl)
+- tr — Turkish (tr)
+- vi — Vietnamese (vi)
+- other — Other language (type the code next)
+
+If they pick **other**, ask once for a code, then validate with `speak_summary_config.py langs`.
+
+## Apply (after pick)
 
 ```bash
 uv run --directory py python speak_summary_config.py set lang CODE
 ```
 
-Report command output. Remind them that `<spoken_summary>` text in replies should be written in that language. Do not edit `speak_summary.toml` manually.
+One-line reminder: `<spoken_summary>` should use that language.

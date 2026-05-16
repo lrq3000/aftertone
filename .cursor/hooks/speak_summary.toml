@@ -1,4 +1,5 @@
 # Spoken summary hook + tts_daemon defaults (read by speak_summary_prepare.py and tts_daemon_ctl.py).
+# Change settings via Cursor slash commands (/aftertone-lang, /aftertone-voice, …) — not by hand.
 # Full reference (every key, languages, daemon commands): README.md in this folder.
 #
 # When edits take effect
@@ -25,7 +26,7 @@ mode = "queue"
 # --- Voice & speech ---
 # Voice preset id (M1, F2, … — whatever JSON files you have under assets/voice_styles/).
 # Used when voice_style is empty; otherwise voice_style wins.
-voice_type = "M1"
+voice_type = "F4"
 # Path to the voice style JSON (relative to py/ or absolute). Set to "" to derive from voice_type only.
 voice_style = ""
 # Language of the spoken *words* and of the ONNX text processor (<lang>…</lang>);

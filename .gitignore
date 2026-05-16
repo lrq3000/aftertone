@@ -1,0 +1,11 @@
+assets/
+.venv/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.cursor/hooks/state/
+*.onnx
+node_modules/
+npm-debug.log*
+.DS_Store
+.uv-cache/

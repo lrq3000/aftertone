@@ -1,0 +1,14 @@
+# Spoken summary hook + tts_daemon defaults (read by speak_summary_prepare.py and tts_daemon_ctl.py).
+enabled = true
+port = 8765
+onnx_dir = "../assets/onnx"
+voice_style = "../assets/voice_styles/M1.json"
+lang = "en"
+use_gpu = false
+total_step = 4
+speed = 1.05
+# Empty = always speak. Set e.g. "22:00-08:00" for overnight quiet (local clock).
+quiet_hours = ""
+min_chars = 5
+max_chars = 240
+mode = "queue"

@@ -1,0 +1,21 @@
+[project]
+name = "cursor-supertonic-tts"
+version = "0.1.0"
+description = "Cursor hooks + local HTTP daemon for Supertonic ONNX TTS (spoken summaries)"
+requires-python = ">=3.10"
+dependencies = [
+    "onnxruntime==1.23.1",
+    "numpy>=1.26.0",
+    "soundfile>=0.12.1",
+    "sounddevice>=0.5.1",
+    "librosa>=0.10.0",
+    "PyYAML>=6.0",
+    "tomli>=2.0.1; python_version < '3.11'",
+]
+
+[tool.setuptools]
+py-modules = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

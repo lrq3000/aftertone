@@ -1,0 +1,26 @@
+---
+description: Emit a short speakable line for local TTS (spoken_summary tag)
+alwaysApply: true
+---
+
+## Spoken summary for Cursor TTS
+
+This workspace runs a hook after each assistant reply that **speaks a short line** via local TTS. The script prefers explicit text inside `<spoken_summary>...</spoken_summary>` in your **final** assistant message; otherwise it guesses from the first sentence (often too long or wrong for speech).
+
+**When to include the tag**
+
+- Include it for **substantive** answers (explanations, steps, design, debugging, multi-sentence replies).
+- **Skip** it for trivial replies (single word, pure ack, “done”, emoji-only). The hook will fall back to a short heuristic or stay quiet if too short.
+
+**What goes inside the tag (this is what gets spoken — nothing else from the reply is chosen)**
+
+- **One** short sentence, as if you were saying it aloud to a busy person walking past.
+- Plain language only: **no** markdown, bullets, code, file paths, or URLs inside the tag (URLs are painful when read aloud).
+- Summarize **outcome or gist** (“We fixed the hook by adding version one”), not every step.
+- Do **not** restate the whole answer; do **not** narrate meta (“here is your summary”).
+- Put the block **at the very end** of the message, on its own lines: open tag `<spoken_summary>`, newline, one sentence, newline, close tag `</spoken_summary>`.
+- Keep the inner line comfortably under ~200 characters so TTS stays snappy.
+
+## Manual check when the user says “test”
+
+If the user is clearly **checking that spoken TTS works** (e.g. they say **“test”**, “test speech”, “test the hook”, “say something”), **always** end your reply with `<spoken_summary>...</spoken_summary>` containing a **short, distinctive** line they can listen for (for example: “Supertonic speech test, one two three.”). That line is what the hook sends to the daemon, so they can confirm end-to-end without guessing which part of the reply would have been chosen.

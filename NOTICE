@@ -1,0 +1,11 @@
+Third-party notices
+===================
+
+This repository includes ONNX inference code derived from the Supertonic
+reference project (MIT License, Copyright (c) 2025 Supertone Inc.):
+
+  https://github.com/supertone-inc/supertonic
+
+Notably: `py/helper.py` and the model-loading patterns used by `py/tts_daemon.py`.
+
+Model weights are not bundled; download separately (see README).

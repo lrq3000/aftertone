@@ -48,7 +48,7 @@ Bring `.cursor/` + `py/` (or symlink). Keep `speak_summary.toml` paths consisten
 | File | Role |
 |------|------|
 | `.cursor/hooks/speak_summary.toml` | Port, `quiet_hours`, `min_chars` / `max_chars`, GPU |
-| `.cursor/rules/spoken-summary.mdc` | Model text: when/how to emit `<spoken_summary>` |
+| `.cursor/rules/spoken-summary.mdc` | When/how to emit `<spoken_summary>`; **write for speech** (expand abbreviations, no URLs in tag) |
 
 Disable speech: `enabled = false` in `speak_summary.toml`.
 

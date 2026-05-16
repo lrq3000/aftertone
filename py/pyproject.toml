@@ -1,7 +1,7 @@
 [project]
-name = "cursor-supertonic-tts"
+name = "aftertone"
 version = "0.1.0"
-description = "Cursor hooks + local HTTP daemon for Supertonic ONNX TTS (spoken summaries)"
+description = "Local Supertonic TTS after agent replies — Cursor hooks today; Claude & Codex adapters welcome."
 requires-python = ">=3.10"
 dependencies = [
     "onnxruntime==1.23.1",

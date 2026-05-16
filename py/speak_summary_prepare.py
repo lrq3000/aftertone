@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Build JSON payload for POST /say from Cursor hook stdin.
+Build JSON payload for POST /say from agent / IDE hook stdin.
 
 Handles:
-- afterAgentResponse: uses inline `text` when hook_event_name is afterAgentResponse
-  (avoids transcript_path, which stop often lacks).
+- afterAgentResponse (Cursor and compatible hooks): uses inline `text` when
+  hook_event_name is afterAgentResponse (avoids transcript_path, which stop often lacks).
 - Other events: reads transcript jsonl from transcript_path when present.
 
 Emits one line JSON for /say or {} if nothing to speak.
@@ -145,8 +145,6 @@ def _first_sentence(s: str) -> str:
             if sep != "\n" and s:
                 s += "."
             break
-    if len(s) > 280:
-        s = s[:277].rsplit(" ", 1)[0] + "..."
     return s
 
 
@@ -157,8 +155,9 @@ def _plain_excerpt(raw: str, max_chars: int) -> str:
 
 
 def _clamp(s: str, max_chars: int) -> str:
+    """Trim speakable text. max_chars <= 0 means no limit (full string)."""
     s = s.strip()
-    if len(s) <= max_chars:
+    if max_chars <= 0 or len(s) <= max_chars:
         return s
     return s[: max_chars - 3].rsplit(" ", 1)[0] + "..."
 
@@ -179,7 +178,8 @@ def main() -> None:
         return
 
     repo = Path(
-        os.environ.get("SUPERTONIC_REPO", "")
+        os.environ.get("AFTERTONE_REPO", "").strip()
+        or os.environ.get("SUPERTONIC_REPO", "").strip()
         or Path(__file__).resolve().parent.parent
     ).resolve()
     cfg_path = repo / ".cursor" / "hooks" / "speak_summary.toml"
@@ -198,7 +198,7 @@ def main() -> None:
         return
 
     min_chars = int(cfg.get("min_chars", 5))
-    max_chars = int(cfg.get("max_chars", 240))
+    max_chars = int(cfg.get("max_chars", 2000))
 
     # Prefer afterAgentResponse: Cursor sends final assistant text here. The `stop` hook
     # often has no transcript_path or an empty payload; afterAgentThought also has `text`

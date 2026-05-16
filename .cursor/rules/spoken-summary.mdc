@@ -3,14 +3,16 @@ description: Emit a short speakable line for local TTS (spoken_summary tag)
 alwaysApply: true
 ---
 
-## Spoken summary for Cursor TTS
+## Spoken summary (Aftertone / local TTS)
 
-This workspace runs a hook after each assistant reply that **speaks a short line** via local TTS. The script prefers explicit text inside `<spoken_summary>...</spoken_summary>` in your **final** assistant message; otherwise it guesses from the first sentence (often too long or wrong for speech).
+This workspace uses **Aftertone**: after a coding agent finishes a reply, a hook can **speak one short line** via local TTS. The prepare script prefers explicit text inside `<spoken_summary>...</spoken_summary>` in your **final** assistant message; otherwise it falls back to a short heuristic (often worse for speech).
+
+**Adapters:** Cursor is wired today; Claude / Codex paths may differ — still end substantive replies with the tag when your tool runs the same TTS pipeline.
 
 **When to include the tag**
 
 - Include it for **substantive** answers (explanations, steps, design, debugging, multi-sentence replies).
-- **Skip** it for trivial replies (single word, pure ack, “done”, emoji-only). The hook will fall back to a short heuristic or stay quiet if too short.
+- **Skip** it for trivial replies (single word, pure ack, “done”, emoji-only).
 
 **What goes inside the tag (this is what gets spoken — nothing else from the reply is chosen)**
 
@@ -19,8 +21,15 @@ This workspace runs a hook after each assistant reply that **speaks a short line
 - Summarize **outcome or gist** (“We fixed the hook by adding version one”), not every step.
 - Do **not** restate the whole answer; do **not** narrate meta (“here is your summary”).
 - Put the block **at the very end** of the message, on its own lines: open tag `<spoken_summary>`, newline, one sentence, newline, close tag `</spoken_summary>`.
-- Keep the inner line comfortably under ~200 characters so TTS stays snappy.
+- Keep it concise; very long lines are capped by `max_chars` in `speak_summary.toml` (see repo root [AGENTS.md](../../AGENTS.md)).
+
+**Speech-friendly wording (TTS reads text literally)**
+
+- **Expand abbreviations** listeners would say in full: write “for example” not “e.g.”, “that is” not “i.e.”, “and so on” not “etc.”, “versus” not “vs.” when it matters.
+- **Avoid Latin shorthand and symbols** that sound wrong or mumbled: prefer “approximately” over “~”, “and” over “&”, “percent” over “%” in the spoken line when clarity matters.
+- **Acronyms:** either spell them as words (“text to speech”) or space letters (“T T S”) if you want letter-by-letter; bare “TTS” may be mispronounced.
+- **File paths, hashes, ticket IDs** in the tag will be read character-by-character — paraphrase (“the config file”) instead.
 
 ## Manual check when the user says “test”
 
-If the user is clearly **checking that spoken TTS works** (e.g. they say **“test”**, “test speech”, “test the hook”, “say something”), **always** end your reply with `<spoken_summary>...</spoken_summary>` containing a **short, distinctive** line they can listen for (for example: “Supertonic speech test, one two three.”). That line is what the hook sends to the daemon, so they can confirm end-to-end without guessing which part of the reply would have been chosen.
+If the user is clearly **checking that spoken TTS works** (e.g. they say **“test”**, “test speech”, “test the hook”, “say something”), **always** end your reply with `<spoken_summary>...</spoken_summary>` containing a **short, distinctive** line they can listen for (for example: “Aftertone speech test, one two three.”). That line is what the hook sends to the daemon, so they can confirm end-to-end without guessing which part of the reply would have been chosen.

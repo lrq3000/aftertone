@@ -1,5 +1,5 @@
 """
-Long-running HTTP TTS daemon for Cursor stop-hook integration.
+Long-running HTTP TTS daemon for IDE / agent hook integration (Aftertone).
 
 Loads Supertonic ONNX once, accepts POST /say with short text, synthesizes and
 plays on a single worker thread. Logs spoken lines to

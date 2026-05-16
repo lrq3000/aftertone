@@ -285,7 +285,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cursor-supertonic-tts"
+name = "aftertone"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Cursor hook: speak a short summary via tts_daemon (afterAgentResponse preferred — has inline `text`;
+# Aftertone / Cursor hook: speak a short summary via tts_daemon (afterAgentResponse preferred — has inline `text`;
 # `stop` often lacks transcript_path). See speak_summary_prepare.py.
 # Never fails the hook: always exits 0.
 #
@@ -10,7 +10,7 @@
 
 set -uo pipefail
 
-# Resolve supertonic repo root whether this file lives at <repo>/.cursor/hooks/ or <repo>/py/.cursor/hooks/.
+# Resolve Aftertone repo root whether this file lives at <repo>/.cursor/hooks/ or <repo>/py/.cursor/hooks/.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="${SCRIPT_DIR}"
 while [[ "${REPO}" != "/" ]]; do
@@ -24,7 +24,8 @@ if [[ ! -f "${REPO}/py/speak_summary_prepare.py" ]]; then
   echo "$(date -u +"%Y-%m-%dT%H:%M:%SZ") speak_summary: could not find repo (no py/speak_summary_prepare.py above ${SCRIPT_DIR})" >>"${SCRIPT_DIR}/../hooks/state/speak_summary-hook.log" || true
   exit 0
 fi
-export SUPERTONIC_REPO="${REPO}"
+export AFTERTONE_REPO="${REPO}"
+export SUPERTONIC_REPO="${REPO}" # legacy alias for scripts / forks
 PY="${REPO}/py"
 PORT_FILE="${REPO}/.cursor/hooks/state/tts-daemon.port"
 STATE_DIR="${REPO}/.cursor/hooks/state"

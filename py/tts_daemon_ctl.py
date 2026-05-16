@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Start/stop/status for py/tts_daemon.py (PID + port files under .cursor/hooks/state/)."""
+"""Start/stop/status for py/tts_daemon.py (Aftertone; PID + port under .cursor/hooks/state/)."""
 
 from __future__ import annotations
 
@@ -18,7 +18,10 @@ else:
 
 
 def _repo_root() -> Path:
-    env = os.environ.get("SUPERTONIC_REPO", "").strip()
+    env = (
+        os.environ.get("AFTERTONE_REPO", "").strip()
+        or os.environ.get("SUPERTONIC_REPO", "").strip()
+    )
     if env:
         return Path(env).resolve()
     return Path(__file__).resolve().parent.parent

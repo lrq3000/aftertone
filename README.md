@@ -1,5 +1,9 @@
 # Aftertone
 
+<p align="center">
+  <img src="img/aftertone-logo.png" alt="Aftertone logo" width="480">
+</p>
+
 **Hear a short spoken line after your coding agent answers** — on-device **[Supertonic](https://github.com/supertone-inc/supertonic) ONNX** through a tiny **local HTTP daemon** (models stay loaded; hooks stay fast).
 
 Aftertone is **not Cursor-only**. Today it ships a **Cursor** `afterAgentResponse` integration; we want first-class paths for **Claude Code / Claude Desktop** and **OpenAI Codex** (CLI or IDE). If that excites you, read [CONTRIBUTING.md](CONTRIBUTING.md) and open a PR or design issue.

@@ -24,12 +24,12 @@ One daemon, thin adapters per tool — **Cursor ships today**; **Claude Code**, 
         <sub>✅ Available</sub>
       </td>
       <td align="center" width="140">
-        <a href="https://docs.anthropic.com/en/docs/claude-code" title="Claude Code"><img src="https://cdn.simpleicons.org/anthropic/191919" alt="Claude Code" height="44" style="opacity:0.55" /></a><br>
+        <a href="https://docs.anthropic.com/en/docs/claude-code" title="Claude Code"><img src="img/adapters/claude.svg" alt="Claude Code" height="44" style="opacity:0.55" /></a><br>
         <strong>Claude Code</strong><br>
         <sub>Coming soon</sub>
       </td>
       <td align="center" width="140">
-        <a href="https://developers.openai.com/codex" title="OpenAI Codex"><img src="https://cdn.simpleicons.org/openai/412991" alt="Codex" height="44" style="opacity:0.55" /></a><br>
+        <a href="https://developers.openai.com/codex" title="OpenAI Codex"><img src="img/adapters/codex.svg" alt="Codex" height="44" style="opacity:0.55" /></a><br>
         <strong>Codex</strong><br>
         <sub>Coming soon</sub>
       </td>

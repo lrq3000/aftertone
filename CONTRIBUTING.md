@@ -14,6 +14,7 @@ Thanks for helping make **local, private “hear the gist”** work across more 
 | **Cursor** `afterAgentResponse` + `tts_daemon` | Shipped | Bugfixes, docs, Windows audio edge cases |
 | **Claude Code** (or Claude Desktop hooks) | Not shipped | Design + PR: how to get “final assistant text” JSON to `speak_summary_prepare.py` or `POST /say` |
 | **OpenAI Codex** (CLI / IDE) | Not shipped | Design + PR: lifecycle hook or wrapper that POSTs short text to the daemon |
+| **OpenCode**, **GitHub Copilot**, **Windsurf**, **JetBrains AI**, **Zed**, **Cline**, **Continue** | Not shipped | Same pattern: final assistant text → `speak_summary_prepare.py` or `POST /say` |
 | **Core** daemon + ONNX pipeline | Shipped | Performance, GPU docs, packaging |
 
 ## Principles

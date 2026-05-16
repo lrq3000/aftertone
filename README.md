@@ -20,7 +20,7 @@ Aftertone is **not Cursor-only**. Today it ships a **Cursor** `afterAgentRespons
 ## Quick start
 
 ```bash
-git clone https://github.com/YOUR_USER/aftertone.git
+git clone https://github.com/omarelkhal/aftertone.git
 cd aftertone
 bash scripts/bootstrap.sh
 ```
@@ -56,7 +56,7 @@ MIT — [LICENSE](LICENSE). Supertonic-derived code: [NOTICE](NOTICE).
 
 ```bash
 cd /path/to/aftertone
-git remote add origin https://github.com/YOUR_USER/aftertone.git
+git remote add origin https://github.com/omarelkhal/aftertone.git
 git push -u origin main
 ```
 

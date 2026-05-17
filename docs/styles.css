@@ -237,8 +237,33 @@ img {
   display: flex;
   gap: 0.75rem;
   justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   margin-bottom: 2.5rem;
+}
+
+.bmc-btn {
+  display: inline-flex;
+  line-height: 0;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.bmc-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.bmc-btn img {
+  display: block;
+  height: 60px;
+  width: auto;
+}
+
+.footer-bmc {
+  margin-top: 1.25rem;
+  text-align: center;
 }
 
 .btn {

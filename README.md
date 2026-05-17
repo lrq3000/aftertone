@@ -8,7 +8,9 @@
 
 One daemon, thin adapters per tool — **Cursor ships today**; **Claude Code**, **Codex**, and **OpenCode** are on the roadmap. Want to help? See [CONTRIBUTING.md](CONTRIBUTING.md) and the **Adapter research** issue template.
 
-☕ **[Support development](https://buymeacoffee.com/elkhalomar)** on Buy Me a Coffee — helps maintain Aftertone and new agent adapters.
+<p align="center">
+  <a href="https://buymeacoffee.com/elkhalomar"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" width="217" height="60" /></a>
+</p>
 
 ## Works with
 
@@ -159,7 +161,11 @@ For **vibe coding**, write a hybrid pair-programmer briefing: what happened, why
 
 ## Support
 
-If Aftertone saves you from reading every agent wall of text, consider **[buying me a coffee](https://buymeacoffee.com/elkhalomar)**. Tips fund maintenance, docs, and adapters (Claude Code, Codex, OpenCode). Code contributions are always welcome too — see [CONTRIBUTING.md](CONTRIBUTING.md).
+<p align="center">
+  <a href="https://buymeacoffee.com/elkhalomar"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" width="217" height="60" /></a>
+</p>
+
+If Aftertone saves you from reading every agent wall of text, tips help fund maintenance, docs, and adapters (Claude Code, Codex, OpenCode). Code contributions are always welcome too — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Contributing
 

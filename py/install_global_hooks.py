@@ -110,9 +110,9 @@ def install_global(*, install_dir: Path, dry_run: bool = False) -> None:
                 dest_root.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
             )
 
-    fragment = json.loads(fragment_src.read_text(encoding="utf-8"))
+    fragment = json.loads(fragment_src.read_text(encoding="utf-8-sig"))
     if user_hooks_json.is_file():
-        existing = json.loads(user_hooks_json.read_text(encoding="utf-8"))
+        existing = json.loads(user_hooks_json.read_text(encoding="utf-8-sig"))
         backup = user_hooks_json.with_suffix(f".json.bak.{int(__import__('time').time())}")
         shutil.copy2(user_hooks_json, backup)
         merged = _merge_hooks(existing, fragment)

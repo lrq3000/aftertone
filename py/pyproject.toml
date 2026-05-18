@@ -1,7 +1,7 @@
 [project]
 name = "aftertone"
-version = "0.1.0"
-description = "Local Supertonic TTS after agent replies — Cursor hooks today; Claude & Codex adapters welcome."
+version = "2.0.0"
+description = "Local Supertonic TTS after agent replies — Cursor hooks; v2 auto-summary + cross-platform CLI."
 requires-python = ">=3.10"
 dependencies = [
     "onnxruntime==1.23.1",
@@ -13,13 +13,17 @@ dependencies = [
     "tomli>=2.0.1; python_version < '3.11'",
 ]
 
+[project.scripts]
+aftertone = "aftertone.cli:main"
+
 [dependency-groups]
 dev = [
     "pytest>=8.0.0",
 ]
 
-[tool.setuptools]
-py-modules = []
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aftertone*"]
 
 [build-system]
 requires = ["setuptools"]

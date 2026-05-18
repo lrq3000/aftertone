@@ -7,7 +7,9 @@ import json
 import sys
 from pathlib import Path
 
-from hook_stdin_normalize import decode_hook_bytes, loads_hook_json
+from aftertone.config import load_config, summary_mode
+from aftertone.hook_json import decode_hook_bytes, loads_hook_json
+from aftertone.paths import install_root
 
 
 def main() -> None:
@@ -21,10 +23,16 @@ def main() -> None:
         return
     ev = d.get("hook_event_name") or d.get("hookEventName") or "?"
     t = d.get("text") if isinstance(d.get("text"), str) else ""
+    try:
+        cfg = load_config(install_root())
+        mode = summary_mode(cfg)
+    except FileNotFoundError:
+        mode = "?"
     print(
         f"event={ev} text_len={len(t)} "
         f"has_spoken_tag={('<spoken_summary>' in t.lower())} "
-        f"has_transcript={bool(d.get('transcript_path'))}"
+        f"has_transcript={bool(d.get('transcript_path'))} "
+        f"summary_mode={mode}"
     )
 
 

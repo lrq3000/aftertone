@@ -57,4 +57,5 @@
 - **`py/` and `assets/` belong at the install/repo root**, not under `.cursor/` — `.cursor/` is the Cursor adapter (hooks, commands, rules, local state); the Python runtime and ONNX weights are shared across adapters.
 - Canonical first-time install: `curl -fsSL https://raw.githubusercontent.com/omarelkhal/aftertone/main/scripts/install.sh | bash -s -- --install-uv --start-daemon` (global hooks + `~/aftertone` by default).
 - **`/aftertone-restart`** restarts the TTS daemon when **port**, **voice_***, **onnx_dir**, or **use_gpu** change; **lang**, **speed**, **enabled**, and **expression_mode** apply on the next hook without restart.
-- Repo **`speak_summary.toml` defaults:** `only_speak_spoken_summary = true`, `total_step = 8`, `expression_mode = "off"` (Supertonic inline expression tags disabled).
+- **v2 (2.0):** `py/aftertone/` package, `summary_mode = "auto"` default (speak without model tags), cross-platform CLI: `uv run --directory py python -m aftertone {on|off|status|repair|doctor|speak}`. Slash commands use the CLI, not bash `aftertone-root.sh` chains.
+- Repo **`speak_summary.toml` defaults:** `summary_mode = "auto"`, `only_speak_spoken_summary = false`, `total_step = 8`, `expression_mode = "off"`.

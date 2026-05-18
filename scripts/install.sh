@@ -150,11 +150,12 @@ start_daemon() {
 
 enable_spoken_tts() {
   local root="$1"
-  echo "==> install: enabling spoken TTS in speak_summary.toml…"
-  (cd "${root}/py" && uv run python speak_summary_toggle.py on) || {
-    echo "install: could not set enabled=true (use /aftertone-on in Cursor)" >&2
+  echo "==> install: enabling spoken TTS (v2 auto summary mode)…"
+  (cd "${root}/py" && uv run python -m aftertone on) || {
+    echo "install: could not enable TTS (use /aftertone-on in Cursor)" >&2
     return 1
   }
+  (cd "${root}/py" && uv run python -m aftertone repair) || true
 }
 
 sync_spoken_summary_rule() {

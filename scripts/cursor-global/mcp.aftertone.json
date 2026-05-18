@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "aftertone": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${userHome}/aftertone/py",
+        "python",
+        "-m",
+        "aftertone.mcp_server"
+      ]
+    }
+  }
+}

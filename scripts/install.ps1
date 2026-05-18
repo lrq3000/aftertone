@@ -144,13 +144,14 @@ function Get-PythonVersionArg {
 
 function Enable-SpokenTts {
     param([string] $Root)
-    Write-Host "==> install: enabling spoken TTS in speak_summary.toml…"
+    Write-Host "==> install: enabling spoken TTS (v2 auto summary mode)…"
     Push-Location (Join-Path $Root "py")
     $pyArgs = Get-PythonVersionArg -Root $Root
-    & uv run @pyArgs python speak_summary_toggle.py on
+    & uv run @pyArgs python -m aftertone on
     if ($LASTEXITCODE -ne 0) {
-        Write-Warning "install: could not set enabled=true (use /aftertone-on in Cursor)"
+        Write-Warning "install: could not enable TTS (use /aftertone-on in Cursor)"
     }
+    & uv run @pyArgs python -m aftertone repair 2>$null
     Pop-Location
 }
 
@@ -204,8 +205,9 @@ In Cursor only:
   1. Settings -> enable Hooks (required)
   2. Trust the workspace(s) where you want spoken summaries
   3. Reload Cursor after install (hooks.json / rules load at startup)
-  4. Agents must end substantive replies with <spoken_summary>...</spoken_summary> (rule: $env:USERPROFILE\.cursor\rules\spoken-summary.mdc)
-  5. Do not add .cursor/hooks.json in this repo on Windows — use global hooks only. Repair: scripts/repair-windows-hooks.ps1
+  4. v2 speaks automatically after replies (tag optional); summary_mode=auto in speak_summary.toml
+  5. Do not add project .cursor/hooks.json on Windows — use global hooks. Repair: uv run --directory py python -m aftertone repair
+  6. Diagnose: uv run --directory py python -m aftertone doctor
 
 Docs: $Root\README.md
 "@

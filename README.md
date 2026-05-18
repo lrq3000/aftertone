@@ -132,7 +132,7 @@ powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
 
 - **Daemon:** `cd py && uv run python tts_daemon_ctl.py start --repo-root ..` then `status`
 - **Smoke (needs assets + audio):** `bash py/test_speak_summary_pipeline.sh` (Git Bash on Windows)
-- **Diagnostics:** `bash py/diagnose_speak_hooks.sh` (Git Bash on Windows)
+- **Diagnostics:** `bash py/diagnose_speak_hooks.sh` (Git Bash on Windows). Replay a saved hook payload: `bash py/diagnose_speak_hooks.sh path/to/hook.json`
 
 ### Repo root env (any adapter)
 

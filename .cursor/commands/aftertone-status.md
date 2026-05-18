@@ -1,15 +1,12 @@
 ---
 name: aftertone-status
-description: Show Aftertone spoken TTS and speak_summary.toml settings
+description: Show Aftertone TTS and daemon status
 ---
 
-Resolve the **global install** (default `~/aftertone`; see `~/.cursor/hooks/aftertone-install-dir`), then run:
+Run **only** this from the **Aftertone install root**:
 
-```bash
-AFTERTONE_ROOT="$(bash "${HOME}/.cursor/hooks/aftertone-root.sh")"
-uv run --directory "${AFTERTONE_ROOT}/py" python speak_summary_config.py status
-uv run --directory "${AFTERTONE_ROOT}/py" python speak_summary_toggle.py status
-cd "${AFTERTONE_ROOT}/py" && uv run python tts_daemon_ctl.py status --repo-root ..
+```
+uv run --directory py python -m aftertone status
 ```
 
-Do not change files unless the user asked for a change. Explain whether spoken TTS is on, current `lang` / `speed` / `mode` / voice, and whether the daemon is running.
+Report the JSON output. No other edits.

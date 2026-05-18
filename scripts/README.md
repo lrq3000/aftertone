@@ -6,6 +6,24 @@
 | **`install.ps1`** | Windows | Same flow in PowerShell. [README](../README.md#windows--one-line-install) |
 | **`bootstrap.sh`** | Linux / macOS | `uv sync` in `py/`, download `Supertone/supertonic-3` into `assets/` when missing |
 | **`bootstrap.ps1`** | Windows | Same as `bootstrap.sh` (no bash required) |
+| **`uninstall.ps1`** | Windows | Remove install dir, global hooks, daemon on port 8765 |
+| **`repair-windows-hooks.ps1`** | Windows | Re-register global hooks, enable TTS, remove clashing project `hooks.json` |
+| **`aftertone-root.sh`** | all (bash) | Resolve install path; copied to `~/.cursor/hooks/` by install |
+| **`cursor-global/`** | all | Templates for `install_global_hooks.py` (`.cmd` + `hooks.windows.json`) |
+| **`repair-windows-hooks.ps1`** | Windows | Runs `python -m aftertone repair` |
+
+## Aftertone v2 CLI
+
+From install root (`~/aftertone` or `%USERPROFILE%\aftertone`):
+
+```bash
+uv run --directory py python -m aftertone on|off|toggle|status|restart|repair|doctor|speak "hello"
+```
+
+- **`summary_mode = "auto"`** (default): speak explicit `<spoken_summary>` or auto-extract a short line.
+- Optional MCP template: [`cursor-global/mcp.aftertone.json`](cursor-global/mcp.aftertone.json) — control only, not the speech trigger.
+
+Hook replay: `bash py/diagnose_speak_hooks.sh [hook.json]`
 
 Python **3.13** is pinned in `py/.python-version` (onnxruntime wheels; avoid system Python 3.14+ on Windows).
 

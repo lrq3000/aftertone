@@ -59,9 +59,10 @@ If you are searching for **local text-to-speech**, **on-device** assistants, **A
 ## Features (today)
 
 - **Cursor:** `afterAgentResponse` → optional TTS from inline reply text (prefers the **last** `<spoken_summary>…</spoken_summary>` at the end of the reply).
-- **Flow briefings:** agents write a short listening line (state, why it matters, optional next move) — see [spoken-summary rule](.cursor/rules/spoken-summary.mdc). Repo default: **`only_speak_spoken_summary = true`** (no heuristic fallback).
+- **Flow briefings:** agents write a short listening line (state, why it matters, optional next move) — see [spoken-summary rule](.cursor/rules/spoken-summary.mdc). Repo default: **`summary_mode = "tag_only"`** (only the tag is spoken; set **`auto`** in TOML for heuristic fallback when the model omits the tag).
 - **Livelier delivery:** end each sentence in the tag with `!!`, `??`, `?!`, or `!?` (Supertonic prosody); **`expression_mode = "off"`** by default (inline `<sigh>` tags are optional via `/aftertone-expression`).
-- **Slash commands** in Agent chat (`/aftertone-lang`, `/aftertone-voice`, `/aftertone-restart`, …) — no hand-editing TOML for everyday changes.
+- **Slash commands** in Agent chat (`/aftertone-lang`, `/aftertone-voice`, `/aftertone-restart`, …) — each runs **one** `python -m aftertone …` call (writes TOML; restarts the daemon when needed). No hand-editing TOML for everyday changes.
+- **v2 CLI:** `cd py && uv run python -m aftertone {on|off|toggle|status|restart|repair|doctor|set …}` — same contract as slash commands; install root from `aftertone-install-dir` or `AFTERTONE_INSTALL_DIR`.
 - `speak_summary_prepare.py` → JSON for `POST /say`; `tts_daemon.py` → localhost server.
 - Optional `stop` hook trace for debugging.
 - `bash scripts/bootstrap.sh` or `scripts/bootstrap.ps1` (Windows) — `uv sync`, Hugging Face assets if `assets/onnx/` is missing.
@@ -130,9 +131,9 @@ powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
 
 **Cursor:** enable **Hooks** in Settings and **trust** each workspace where you want TTS. After a global install, hooks live in your user **`.cursor/hooks.json`** (not in every project). Slash commands are copied to **`.cursor/commands/`**; config still reads **`<install-dir>/.cursor/hooks/speak_summary.toml`** (default install dir above).
 
-- **Daemon:** `cd py && uv run python tts_daemon_ctl.py start --repo-root ..` then `status`
+- **Daemon:** `cd py && uv run python -m aftertone restart` (or `tts_daemon_ctl.py start --repo-root ..` then `status`)
 - **Smoke (needs assets + audio):** `bash py/test_speak_summary_pipeline.sh` (Git Bash on Windows)
-- **Diagnostics:** `bash py/diagnose_speak_hooks.sh` (Git Bash on Windows). Replay a saved hook payload: `bash py/diagnose_speak_hooks.sh path/to/hook.json`
+- **Diagnostics:** `uv run --directory py python -m aftertone doctor` or `bash py/diagnose_speak_hooks.sh` (Git Bash on Windows). Replay a saved hook payload: `bash py/diagnose_speak_hooks.sh path/to/hook.json`
 
 ### Repo root env (any adapter)
 
@@ -167,11 +168,23 @@ In **Agent** chat, type **`/`** and pick an **`aftertone-`** command (available 
 | `/aftertone-mode` | Pick `queue` or `interrupt` | No |
 | `/aftertone-expression` | Supertonic inline expression tags (`off` / `subtle` / …); repo default **`off`** | No |
 | `/aftertone-voice` | Pick a voice (e.g. Sara (female), James (male)) | **Yes** (command restarts for you) |
-| `/aftertone-restart` | Reload daemon after **port**, **voice**, **onnx_dir**, or **use_gpu** changes | **Yes** |
+| `/aftertone-restart` | Reload daemon after **port**, **voice**, **onnx_dir**, **use_gpu**, or **total_step** changes | **Yes** |
+| `/aftertone-doctor` | Diagnostics (hooks, config, daemon, assets) | No |
+| `/aftertone-repair` | Re-register global hooks, apply install defaults, restart daemon | **Yes** |
 
-Command definitions: [`.cursor/commands/`](.cursor/commands/).
+Command definitions: [`.cursor/commands/`](.cursor/commands/). Each command tells the agent to run **one** CLI invocation from the install root (no bash chains, no hand-edited TOML).
 
-**Daemon CLI (advanced):** `cd py && uv run python tts_daemon_ctl.py {start|stop|status|restart} --repo-root ..` — see [`.cursor/hooks/README.md`](.cursor/hooks/README.md). Prefer **`/aftertone-restart`** in Agent chat when voice or port changed. Turning TTS **off** via `/aftertone-off` does not unload models; use **stop** when you want silence and no GPU/RAM use.
+**CLI (install root or `aftertone-install-dir`):**
+
+```bash
+cd "$(cat ~/.cursor/hooks/aftertone-install-dir)"   # or %USERPROFILE%\.cursor\hooks\aftertone-install-dir on Windows
+uv run --directory py python -m aftertone status
+uv run --directory py python -m aftertone set lang fr
+uv run --directory py python -m aftertone set voice F4 --ensure
+uv run --directory py python -m aftertone restart
+```
+
+**Lower level:** `cd py && uv run python tts_daemon_ctl.py {start|stop|status|restart} --repo-root ..` — see [`.cursor/hooks/README.md`](.cursor/hooks/README.md). Prefer **`/aftertone-restart`** or **`aftertone restart`** when voice or port changed. Turning TTS **off** via `/aftertone-off` does not unload models; use **stop** when you want silence and no GPU/RAM use.
 
 ### Spoken summaries (agents)
 

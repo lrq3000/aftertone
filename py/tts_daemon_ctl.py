@@ -72,11 +72,12 @@ def _voice_style_abs(repo: Path, cfg: dict) -> Path:
     p = Path(rel)
     if p.is_absolute():
         return p.resolve()
-    return (_py_dir() / p).resolve()
+    # Paths like ../assets/voice_styles/F4.json are relative to <install>/py/
+    return (repo / "py" / p).resolve()
 
 
-def _listener_pid_on_port(port: int) -> int | None:
-    """PID listening on 127.0.0.1:port (Linux ss), or None."""
+def _listener_pid_on_port_ss(port: int) -> int | None:
+    """PID listening on :port via `ss` (Linux)."""
     try:
         proc = subprocess.run(
             ["ss", "-tlnp", f"sport = :{port}"],
@@ -89,6 +90,49 @@ def _listener_pid_on_port(port: int) -> int | None:
         return None
     m = re.search(r"pid=(\d+)", proc.stdout or "")
     return int(m.group(1)) if m else None
+
+
+def _listener_pid_on_port_netstat(port: int) -> int | None:
+    """PID listening on :port via `netstat -ano` (Windows and fallback)."""
+    try:
+        proc = subprocess.run(
+            ["netstat", "-ano"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            check=False,
+        )
+    except FileNotFoundError:
+        return None
+    if proc.returncode != 0:
+        return None
+    needle = f":{port}"
+    for line in (proc.stdout or "").splitlines():
+        upper = line.upper()
+        if "LISTENING" not in upper and "LISTEN" not in upper:
+            continue
+        if needle not in line:
+            continue
+        parts = line.split()
+        if not parts:
+            continue
+        try:
+            return int(parts[-1])
+        except ValueError:
+            continue
+    return None
+
+
+def _listener_pid_on_port(port: int) -> int | None:
+    """PID of process listening on 127.0.0.1:port (platform-specific)."""
+    if sys.platform == "win32":
+        return _listener_pid_on_port_netstat(port)
+    pid = _listener_pid_on_port_ss(port)
+    if pid is not None:
+        return pid
+    return _listener_pid_on_port_netstat(port)
 
 
 def _kill_pid(pid: int, *, label: str = "tts_daemon") -> None:
@@ -118,11 +162,11 @@ def _fetch_healthz(port: int) -> dict | None:
 
 def _verify_daemon_ready(port: int, expected_voice: Path) -> tuple[bool, str, int | None]:
     """Return (ok, error_message, listener_pid)."""
-    listener = _listener_pid_on_port(port)
-    if listener is None:
-        return False, f"nothing listening on port {port}", None
     data = _fetch_healthz(port)
+    listener = _listener_pid_on_port(port)
     if not data:
+        if listener is None:
+            return False, f"nothing listening on port {port}", None
         return False, "healthz unreachable", listener
     voice = str(data.get("voice", "") or "")
     if not voice:
@@ -137,6 +181,8 @@ def _verify_daemon_ready(port: int, expected_voice: Path) -> tuple[bool, str, in
             )
     except OSError:
         return False, f"healthz voice path invalid: {voice!r}", listener
+    if listener is None:
+        listener = _listener_pid_on_port(port)
     return True, "", listener
 
 
@@ -322,30 +368,39 @@ def cmd_start(repo: Path, port_override: int | None) -> int:
         start_new_session=True,
     )
     _port_path(repo).write_text(str(port), encoding="utf-8")
-    # Wait until something on :port reports the expected voice (uv run → child owns the port)
-    deadline = time.monotonic() + 120.0
+    # Wait until healthz reports the expected voice (model load can take minutes on CPU).
+    start_timeout = float(os.environ.get("AFTERTONE_DAEMON_START_TIMEOUT", "180"))
+    deadline = time.monotonic() + start_timeout
     ok = False
     last_err = "timeout"
     listener_pid: int | None = None
+    last_progress = time.monotonic()
     while time.monotonic() < deadline:
         if proc.poll() is not None:
             # uv wrapper exited; child may still be loading — keep polling healthz briefly
-            if _listener_pid_on_port(port) is None:
+            if _listener_pid_on_port(port) is None and _fetch_healthz(port) is None:
                 print(
                     f"tts_daemon: process exited early code={proc.poll()} log={log_path}"
                 )
                 _pid_path(repo).unlink(missing_ok=True)
                 return 1
         ready, last_err, listener_pid = _verify_daemon_ready(port, expected_voice)
-        if ready and listener_pid is not None:
+        if ready:
             ok = True
             break
+        if time.monotonic() - last_progress >= 10.0:
+            print(
+                f"tts_daemon: loading models… ({last_err})",
+                file=sys.stderr,
+            )
+            last_progress = time.monotonic()
         time.sleep(0.3)
     if not ok:
         print(f"tts_daemon: not ready ({last_err}); check {log_path}", file=sys.stderr)
         _pid_path(repo).unlink(missing_ok=True)
         return 1
-    _pid_path(repo).write_text(str(listener_pid), encoding="utf-8")
+    if listener_pid is not None:
+        _pid_path(repo).write_text(str(listener_pid), encoding="utf-8")
     try:
         from voice_presets import voice_display_name
 

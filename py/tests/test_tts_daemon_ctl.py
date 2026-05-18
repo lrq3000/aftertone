@@ -40,6 +40,48 @@ def test_verify_daemon_ready_rejects_wrong_voice(monkeypatch, tmp_path):
     assert listener == 12345
 
 
+def test_listener_pid_on_port_netstat_parses_windows_line():
+    sample = (
+        "  TCP    127.0.0.1:8765         0.0.0.0:0              LISTENING       53308\n"
+        "  TCP    0.0.0.0:8765           0.0.0.0:0              LISTENING       99999\n"
+    )
+
+    class FakeProc:
+        returncode = 0
+        stdout = sample
+
+    def fake_run(*_a, **_k):
+        return FakeProc()
+
+    monkeypatch = pytest.MonkeyPatch()
+    import subprocess
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    assert ctl._listener_pid_on_port_netstat(8765) == 53308
+    monkeypatch.undo()
+
+
+def test_verify_daemon_ready_accepts_healthz_when_listener_late(monkeypatch, tmp_path):
+    """healthz can succeed before netstat/ss reports a pid (Windows model load)."""
+    voice = tmp_path / "F4.json"
+    voice.write_text("{}", encoding="utf-8")
+    calls = {"n": 0}
+
+    def listener(_port):
+        calls["n"] += 1
+        return 42 if calls["n"] >= 2 else None
+
+    monkeypatch.setattr(ctl, "_listener_pid_on_port", listener)
+    monkeypatch.setattr(
+        ctl,
+        "_fetch_healthz",
+        lambda _port: {"voice": str(voice.resolve()), "ready": True},
+    )
+    ok, err, listener = ctl._verify_daemon_ready(8765, voice)
+    assert ok, err
+    assert listener == 42
+
+
 def test_verify_daemon_ready_accepts_matching_voice(monkeypatch, tmp_path):
     voice = tmp_path / "M3.json"
     voice.write_text("{}", encoding="utf-8")

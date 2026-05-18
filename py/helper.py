@@ -287,6 +287,23 @@ class TextToSpeech:
                 dur_cat += dur_onnx + silence_duration
         return wav_cat, dur_cat
 
+    def iter_chunk_audio(
+        self,
+        text: str,
+        lang: str,
+        style: Style,
+        total_step: int,
+        speed: float = 1.05,
+        *,
+        max_len: int = 300,
+    ):
+        """Yield one float32 audio array per text chunk (synth chunk N before chunk N+1)."""
+        assert style.ttl.shape[0] == 1, "iter_chunk_audio supports single style only"
+        for piece in chunk_text(text, max_len=max_len):
+            wav, dur_onnx = self._infer([piece], [lang], style, total_step, speed)
+            n = int(self.sample_rate * float(dur_onnx[0].item()))
+            yield np.asarray(wav[0, :n], dtype=np.float32)
+
     def batch(
         self,
         text_list: list[str],
@@ -366,6 +383,9 @@ def load_text_processor(onnx_dir: str) -> UnicodeProcessor:
 def load_text_to_speech(onnx_dir: str, use_gpu: bool = False) -> TextToSpeech:
     opts = ort.SessionOptions()
     opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    threads = min(8, (os.cpu_count() or 4))
+    opts.intra_op_num_threads = threads
+    opts.inter_op_num_threads = 1
     if use_gpu:
         # Requires pip package onnxruntime-gpu (not onnxruntime) and a working CUDA stack.
         # ORT tries CUDA first, then CPU if CUDA is unavailable at runtime.

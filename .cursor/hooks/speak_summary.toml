@@ -37,7 +37,7 @@ lang = "en"
 # Playback speed: 1.0 is baseline; higher speaks faster (same meaning as CLI examples).
 speed = 1.0
 # ONNX denoising steps (quality vs CPU). Upstream examples often use 8; 4 is faster but rougher.
-total_step = 8
+total_step = 4
 
 # Empty = always speak. Set e.g. "22:00-08:00" for overnight quiet (local clock).
 quiet_hours = ""

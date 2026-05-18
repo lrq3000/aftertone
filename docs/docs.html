@@ -41,6 +41,7 @@
         <a href="#getting-started">Getting started</a>
         <a href="#slash-commands">Slash commands</a>
         <a href="#cursor">Cursor setup</a>
+        <a href="#cli">Aftertone CLI</a>
         <a href="#daemon">Daemon commands</a>
         <a href="#config">Configuration</a>
         <a href="#spoken-summary">Spoken summaries</a>
@@ -76,7 +77,7 @@
         <summary style="cursor: pointer; font-weight: 600;">Optional: manual clone, other projects, smoke test</summary>
         <p style="margin-top: 0.75rem; color: var(--muted);">
           Manual: <code>git clone … && bash scripts/bootstrap.sh</code> and
-          <code>tts_daemon_ctl.py start</code>.
+          <code>uv run --directory py python -m aftertone restart</code>.
           Other repo: <code>bash -s -- --into .</code>.
           Verify: <code>bash py/test_speak_summary_pipeline.sh</code>.
           <a href="https://github.com/omarelkhal/aftertone/blob/main/scripts/README.md">scripts/README.md</a>.
@@ -85,7 +86,7 @@
 
 
       <h2 id="slash-commands">Slash commands (Cursor)</h2>
-      <p>Open the Aftertone folder as the workspace root. In <strong>Agent</strong> chat, type <code>/</code> and pick an <code>aftertone-</code> command. The agent runs the repo scripts for you — <strong>do not</strong> hand-edit <code>speak_summary.toml</code> for everyday changes.</p>
+      <p>After a <strong>global install</strong>, slash commands work in <strong>any</strong> trusted workspace (commands live in <code>~/.cursor/commands/</code>). In <strong>Agent</strong> chat, type <code>/</code> and pick an <code>aftertone-</code> command. The agent runs <strong>one</strong> <code>python -m aftertone …</code> invocation from your install dir (<code>aftertone-install-dir</code>) — <strong>do not</strong> hand-edit <code>speak_summary.toml</code> for everyday changes.</p>
 
       <div class="table-wrap">
         <table>
@@ -102,6 +103,8 @@
             <tr><td><code>/aftertone-expression</code></td><td>Inline Supertonic expression tags (<code>off</code> default; optional <code>subtle</code> / <code>expressive</code>)</td><td>No</td></tr>
             <tr><td><code>/aftertone-voice</code></td><td>Voice picker (human names, e.g. Sara (female), James (male))</td><td><strong>Yes</strong> (command restarts for you)</td></tr>
             <tr><td><code>/aftertone-restart</code></td><td>Reload daemon after <code>port</code>, <code>voice_*</code>, <code>onnx_dir</code>, or <code>use_gpu</code> change</td><td><strong>Yes</strong></td></tr>
+            <tr><td><code>/aftertone-doctor</code></td><td>Diagnostics (hooks, config, daemon, assets)</td><td>No</td></tr>
+            <tr><td><code>/aftertone-repair</code></td><td>Re-register global hooks, apply install defaults, restart daemon</td><td><strong>Yes</strong></td></tr>
           </tbody>
         </table>
       </div>
@@ -112,6 +115,20 @@
       </div>
 
       <p>Command definitions: <a href="https://github.com/omarelkhal/aftertone/tree/main/.cursor/commands"><code>.cursor/commands/</code></a> on GitHub.</p>
+
+      <h2 id="cli">Aftertone CLI (v2)</h2>
+      <p>From your install root (path in <code>~/.cursor/hooks/aftertone-install-dir</code> or <code>%USERPROFILE%\.cursor\hooks\aftertone-install-dir</code>):</p>
+      <div class="code-block">
+        <pre><code>cd "$(cat ~/.cursor/hooks/aftertone-install-dir)"
+uv run --directory py python -m aftertone status
+uv run --directory py python -m aftertone on
+uv run --directory py python -m aftertone set lang fr
+uv run --directory py python -m aftertone set voice F4 --ensure
+uv run --directory py python -m aftertone restart
+uv run --directory py python -m aftertone doctor
+uv run --directory py python -m aftertone repair</code></pre>
+      </div>
+      <p><code>set voice</code> restarts the daemon by default. <code>set lang</code> syncs <a href="https://github.com/omarelkhal/aftertone/blob/main/.cursor/rules/spoken-summary.mdc"><code>spoken-summary.mdc</code></a>. Install runs <code>apply-defaults</code> (<code>summary_mode = tag_only</code>, <code>total_step = 8</code>).</p>
 
       <h2 id="cursor">Cursor setup</h2>
       <div class="cards" style="margin-bottom: 1.25rem;">
@@ -133,12 +150,13 @@
 
       <div class="callout callout-tip">
         <strong>Verify Cursor called the hook</strong>
-        After one agent reply: <code>bash py/diagnose_speak_hooks.sh</code> or inspect <code>.cursor/hooks/state/hook_payload_trace.jsonl</code> for <code>afterAgentResponse</code> with <code>inline_after_response_ok: true</code>.
+        After one agent reply: <code>uv run --directory py python -m aftertone doctor</code>, <code>bash py/diagnose_speak_hooks.sh</code>, or inspect <code>.cursor/hooks/state/hook_payload_trace.jsonl</code> for <code>afterAgentResponse</code> with <code>inline_after_response_ok: true</code>.
       </div>
 
       <h2 id="daemon">Daemon commands</h2>
-      <p>In Agent chat, <code>/aftertone-restart</code> runs the same reload as the CLI below (use after changing voice, port, ONNX path, or GPU). <code>/aftertone-voice</code> also restarts for you.</p>
-      <p>Run from <code>py/</code> with <code>--repo-root ..</code> (one level up to the repo root):</p>
+      <p>Prefer <code>/aftertone-restart</code> or <code>uv run --directory py python -m aftertone restart</code> after changing voice, port, ONNX path, or GPU. <code>/aftertone-voice</code> restarts for you.</p>
+      <p><strong>Recommended:</strong> from install root — <code>uv run --directory py python -m aftertone {status|restart}</code> (see <a href="#cli">Aftertone CLI</a>).</p>
+      <p><strong>Lower level</strong> — run from <code>py/</code> with <code>--repo-root ..</code>:</p>
       <div class="code-block">
         <pre><code>cd py
 uv run python tts_daemon_ctl.py start --repo-root ..
@@ -179,7 +197,8 @@ uv run python tts_daemon_ctl.py stop --repo-root ..</code></pre>
             <tr><td><code>speed</code></td><td>Playback speed (1.0 = baseline)</td></tr>
             <tr><td><code>quiet_hours</code></td><td>e.g. <code>22:00-08:00</code> — no speech in that window (local clock)</td></tr>
             <tr><td><code>spoken_summary_max_chars</code></td><td>Cap for tag text (default 360)</td></tr>
-            <tr><td><code>only_speak_spoken_summary</code></td><td><code>true</code> (repo default) = only the tag is spoken</td></tr>
+            <tr><td><code>summary_mode</code></td><td><code>tag_only</code> (repo default) = only <code>&lt;spoken_summary&gt;</code>; <code>auto</code> = tag or heuristic excerpt; <code>heuristic</code> = excerpt only</td></tr>
+            <tr><td><code>only_speak_spoken_summary</code></td><td>Legacy alias for <code>tag_only</code> when <code>summary_mode</code> is unset</td></tr>
             <tr><td><code>total_step</code></td><td>ONNX denoising steps (default <strong>8</strong> — quality vs CPU)</td></tr>
             <tr><td><code>expression_mode</code></td><td><code>off</code> default; optional inline tags via <code>/aftertone-expression</code></td></tr>
           </tbody>
@@ -194,14 +213,14 @@ uv run python tts_daemon_ctl.py stop --repo-root ..</code></pre>
 Tests pass and the daemon is restarted!! Your next reply should sound cleaner??
 &lt;/spoken_summary&gt;</code></pre>
       <p>The hook uses the <strong>last</strong> <code>&lt;/spoken_summary&gt;</code> and pairs it with the nearest opening tag before it. Do not leave a bare <code>&lt;spoken_summary&gt;</code> in code or prose above your real tag (that can swallow the wrong text).</p>
-      <p>Repo default <code>only_speak_spoken_summary = true</code> — no heuristic fallback when the tag is missing. For livelier delivery, end <strong>each sentence</strong> in the tag with <code>!!</code>, <code>??</code>, <code>?!</code>, or <code>!?</code>. Inline <code>&lt;sigh&gt;</code> tags are optional via <code>/aftertone-expression</code> (default <code>off</code>).</p>
+      <p>Repo default <code>summary_mode = "tag_only"</code> — no speech when the tag is missing (set <code>summary_mode = "auto"</code> in TOML for heuristic fallback). For livelier delivery, end <strong>each sentence</strong> in the tag with <code>!!</code>, <code>??</code>, <code>?!</code>, or <code>!?</code>. Inline <code>&lt;sigh&gt;</code> tags are optional via <code>/aftertone-expression</code> (default <code>off</code>).</p>
       <p>Rules for agents: <a href="https://github.com/omarelkhal/aftertone/blob/main/.cursor/rules/spoken-summary.mdc"><code>.cursor/rules/spoken-summary.mdc</code></a>.</p>
 
       <h2 id="troubleshooting">Troubleshooting</h2>
       <div class="cards">
         <article class="card">
           <h3>Nothing speaks</h3>
-          <p>Run <code>bash py/test_speak_summary_pipeline.sh</code>. Check daemon <code>status</code>, Cursor Hooks panel, trusted workspace, and <code>tail .cursor/hooks/state/speak_summary-hook.log</code>.</p>
+          <p>Run <code>/aftertone-doctor</code> or <code>uv run --directory py python -m aftertone doctor</code>, then <code>bash py/test_speak_summary_pipeline.sh</code>. Check <code>/aftertone-status</code>, Cursor Hooks panel, trusted workspace, and <code>speak_summary-hook.log</code>.</p>
         </article>
         <article class="card">
           <h3>Wrong language or accent</h3>
@@ -213,7 +232,7 @@ Tests pass and the daemon is restarted!! Your next reply should sound cleaner??
         </article>
         <article class="card">
           <h3>Wrong text spoken</h3>
-          <p>Usually an unclosed <code>&lt;spoken_summary&gt;</code> mention earlier in the reply, or no tag at the end. Put only one closing block at the bottom; check <code>only_speak_spoken_summary</code>.</p>
+          <p>Usually an unclosed <code>&lt;spoken_summary&gt;</code> mention earlier in the reply, or no tag at the end with <code>summary_mode = tag_only</code>. Put only one closing block at the bottom, or set <code>summary_mode = "auto"</code>.</p>
         </article>
         <article class="card">
           <h3>Quiet hours</h3>
@@ -226,7 +245,8 @@ Tests pass and the daemon is restarted!! Your next reply should sound cleaner??
       <ul style="color: var(--muted); line-height: 1.8;">
         <li><a href="https://github.com/omarelkhal/aftertone/blob/main/.cursor/hooks/README.md">.cursor/hooks/README.md</a> — hook + daemon reference</li>
         <li><a href="https://github.com/omarelkhal/aftertone/blob/main/AGENTS.md">AGENTS.md</a> — short agent-oriented digest</li>
-        <li><a href="https://github.com/omarelkhal/aftertone/blob/main/py/README.md">py/README.md</a> — Python env and CLI</li>
+        <li><a href="https://github.com/omarelkhal/aftertone/blob/main/py/README.md">py/README.md</a> — Python env</li>
+        <li><a href="https://github.com/omarelkhal/aftertone/blob/main/py/aftertone/README.md">py/aftertone/README.md</a> — v2 package (<code>python -m aftertone</code>)</li>
         <li><a href="https://github.com/omarelkhal/aftertone/blob/main/README.md">README.md</a> — project overview</li>
       </ul>
     </article>

@@ -124,14 +124,28 @@ class TTSWorker:
             if not text:
                 continue
             t0 = time.perf_counter()
+            synth_ms = 0
+            play_ms = 0
+            first_audio_ms: int | None = None
             try:
                 lang = ((job.lang or "").strip() or self.lang).strip()
-                wav, dur = self.tts(
-                    text, lang, self.style, job.total_step, job.speed
-                )
-                n = int(self.sample_rate * float(dur[0].item()))
-                audio = np.asarray(wav[0, :n], dtype=np.float32)
-                play_audio_blocking(audio, self.sample_rate, self.backend)
+                # Play each ONNX chunk as soon as it is ready (lower time-to-first-sound).
+                chunk_max = 200
+                for audio in self.tts.iter_chunk_audio(
+                    text,
+                    lang,
+                    self.style,
+                    job.total_step,
+                    job.speed,
+                    max_len=chunk_max,
+                ):
+                    if synth_ms == 0:
+                        synth_ms = int((time.perf_counter() - t0) * 1000)
+                    t_play = time.perf_counter()
+                    play_audio_blocking(audio, self.sample_rate, self.backend)
+                    if first_audio_ms is None:
+                        first_audio_ms = int((time.perf_counter() - t0) * 1000)
+                    play_ms += int((time.perf_counter() - t_play) * 1000)
             except Exception as e:
                 print(f"[tts_daemon] synth/play error: {e}", flush=True)
                 continue
@@ -146,6 +160,10 @@ class TTSWorker:
                     "conversation_id": job.conversation_id,
                     "text": text[:500],
                     "took_ms": took_ms,
+                    "synth_ms": synth_ms,
+                    "play_ms": play_ms,
+                    "first_audio_ms": first_audio_ms,
+                    "total_step": job.total_step,
                 },
             )
 

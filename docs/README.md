@@ -5,7 +5,7 @@ Static site for [aftertone on GitHub Pages](https://omarelkhal.github.io/afterto
 | File | URL |
 |------|-----|
 | `index.html` | Home — overview, flow, one-line install |
-| `docs.html` | Documentation — install, **slash commands**, Cursor, daemon, config, troubleshooting |
+| `docs.html` | Documentation — install, **slash commands**, v2 CLI, Cursor, daemon, config, troubleshooting |
 | `styles.css` | Shared styles |
 
 **Publish:** Repository **Settings → Pages** → Source **Deploy from a branch** → Branch **`main`**, folder **`/docs`**.

@@ -88,7 +88,7 @@
         <div class="flow-step">
           <span class="flow-step-num">2</span>
           <h3>Hook prepares text</h3>
-          <p>Prefers <code>&lt;spoken_summary&gt;</code>, else a short heuristic excerpt.</p>
+          <p>Speaks the <code>&lt;spoken_summary&gt;</code> tag (repo default). Set <code>summary_mode = "auto"</code> for heuristic fallback when the tag is missing.</p>
         </div>
         <span class="flow-arrow" aria-hidden="true">→</span>
         <div class="flow-step">
@@ -127,7 +127,7 @@
           </article>
           <article class="card">
             <h3>Slash commands</h3>
-            <p><code>/aftertone-lang</code>, <code>/aftertone-voice</code>, <code>/aftertone-restart</code>, <code>/aftertone-status</code>, and more — no hand-editing TOML.</p>
+            <p><code>/aftertone-lang</code>, <code>/aftertone-voice</code>, <code>/aftertone-status</code>, <code>/aftertone-doctor</code>, and more — each runs one <code>python -m aftertone</code> call (writes TOML; restarts the daemon when needed).</p>
           </article>
         </div>
       </div>
@@ -147,7 +147,7 @@ The hook fix is on main!! Send another reply with only one tag at the end??
 &lt;/spoken_summary&gt;</code></pre>
         </div>
         <p style="color: var(--muted); font-size: 0.95rem; max-width: 40rem;">
-          Set language with <code>/aftertone-lang</code>; write the tag in that language (no auto-translation).
+          Repo default <code>summary_mode = "tag_only"</code> — agents should end substantive replies with the tag. Set language with <code>/aftertone-lang</code>; write the tag in that language (no auto-translation).
           The hook reads the <strong>last</strong> tag pair only. Use <code>!!</code> / <code>??</code> per sentence for livelier TTS.
           <a href="docs.html#spoken-summary">Spoken summary rules</a> · <a href="docs.html#slash-commands">Slash commands</a>.
         </p>

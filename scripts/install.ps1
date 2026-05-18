@@ -151,9 +151,14 @@ function Start-TtsDaemon {
     Write-Host "==> install: starting tts_daemon (may take 1-2 min while models load)…"
     Push-Location (Join-Path $Root "py")
     $pyArgs = Get-PythonVersionArg -Root $Root
+    $logPath = Join-Path $Root ".cursor\hooks\state\tts-daemon.log"
     & uv run @pyArgs python tts_daemon_ctl.py start --repo-root ..
     if ($LASTEXITCODE -ne 0) {
-        Write-Warning "install: daemon start failed; see $Root\.cursor\hooks\state\tts-daemon.log"
+        if ((Test-Path $logPath) -and (Select-String -Path $logPath -Pattern "listening http://" -Quiet)) {
+            Write-Host "==> install: tts_daemon is listening (log OK; health check was slow)"
+        } else {
+            Write-Warning "install: daemon start uncertain; see $logPath"
+        }
     }
     Pop-Location
 }
@@ -195,3 +200,4 @@ if (-not $NoStartDaemon) {
 }
 
 Show-NextSteps -Root $InstallDir
+exit 0

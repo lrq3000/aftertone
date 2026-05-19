@@ -9,21 +9,28 @@ import shutil
 import time
 from pathlib import Path
 
-from install_global_hooks import _AFTER_AGENT, _CMD
+from install_global_hooks import _strip_aftertone_entries
+
+
+def _count_aftertone_commands(hooks: dict) -> int:
+    n = 0
+    for entries in hooks.values():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            if isinstance(entry, dict) and "aftertone-speak_summary" in (
+                entry.get("command") or ""
+            ):
+                n += 1
+    return n
 
 
 def _remove_aftertone_hook_entries(hooks_data: dict) -> tuple[dict, int]:
-    """Drop Aftertone afterAgentResponse entries; return (updated doc, removed count)."""
+    """Drop Aftertone hook commands (Unix + Windows); return (updated doc, removed count)."""
     out = dict(hooks_data)
     hooks = dict(out.get("hooks") or {})
-    entries = list(hooks.get(_AFTER_AGENT) or [])
-    kept = [e for e in entries if not (isinstance(e, dict) and e.get("command") == _CMD)]
-    removed = len(entries) - len(kept)
-    if kept:
-        hooks[_AFTER_AGENT] = kept
-    else:
-        hooks.pop(_AFTER_AGENT, None)
-    out["hooks"] = hooks
+    removed = _count_aftertone_commands(hooks)
+    out["hooks"] = _strip_aftertone_entries(hooks)
     return out, removed
 
 
@@ -35,6 +42,7 @@ def uninstall_global(*, dry_run: bool = False) -> None:
     hook_files = [
         user_hooks / "aftertone-install-dir",
         user_hooks / "aftertone-speak_summary.sh",
+        user_hooks / "aftertone-speak_summary.cmd",
         user_hooks / "aftertone-root.sh",
     ]
     command_glob = "aftertone-*.md"

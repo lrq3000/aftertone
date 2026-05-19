@@ -28,6 +28,23 @@ def test_remove_aftertone_hook_entries_keeps_other_hooks() -> None:
     assert cmds == ["bash ./hooks/other.sh"]
 
 
+def test_remove_aftertone_hook_entries_removes_windows_cmd() -> None:
+    existing = {
+        "version": 1,
+        "hooks": {
+            "afterAgentResponse": [
+                {
+                    "command": r"cmd /c hooks\aftertone-speak_summary.cmd",
+                    "timeout": 8,
+                },
+            ],
+        },
+    }
+    updated, removed = _remove_aftertone_hook_entries(existing)
+    assert removed == 1
+    assert "afterAgentResponse" not in updated["hooks"]
+
+
 def test_remove_aftertone_hook_entries_drops_empty_event() -> None:
     existing = {
         "version": 1,

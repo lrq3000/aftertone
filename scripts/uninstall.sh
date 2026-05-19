@@ -113,13 +113,19 @@ stop_daemon() {
   pkill -f "tts_daemon.py" 2>/dev/null || true
 }
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_FROM_SCRIPT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+# curl | bash has no script path on disk; BASH_SOURCE[0] is unset under set -u.
+_SCRIPT_SRC="${BASH_SOURCE[0]:-}"
+if [[ -n "${_SCRIPT_SRC}" ]]; then
+  SCRIPT_DIR="$(cd "$(dirname "${_SCRIPT_SRC}")" && pwd)"
+  REPO_FROM_SCRIPT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+else
+  REPO_FROM_SCRIPT=""
+fi
 
 run_uninstall_global_hooks() {
   local extra=("$@")
   local py_roots=()
-  if [[ -f "${REPO_FROM_SCRIPT}/py/uninstall_global_hooks.py" ]]; then
+  if [[ -n "${REPO_FROM_SCRIPT}" ]] && [[ -f "${REPO_FROM_SCRIPT}/py/uninstall_global_hooks.py" ]]; then
     py_roots+=("${REPO_FROM_SCRIPT}")
   fi
   if [[ -f "${INSTALL_DIR}/py/uninstall_global_hooks.py" ]] \

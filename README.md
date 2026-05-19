@@ -14,13 +14,9 @@
 </p>
 
 <p align="center">
-  <a href="https://omarelkhal.github.io/aftertone/#demo">
-    <img src="docs/demo-poster.svg" alt="Watch Aftertone demo — short dev question and clone-a-repo task with local spoken summaries" width="720" />
-  </a>
-</p>
-<p align="center">
-  <strong><a href="https://omarelkhal.github.io/aftertone/#demo">▶ Watch the demo</a></strong>
-  · <a href="https://omarelkhal.github.io/aftertone/demo.mp4">Download MP4</a>
+  <video src="https://raw.githubusercontent.com/omarelkhal/aftertone/main/docs/demo.mp4" controls width="720" playsinline poster="https://raw.githubusercontent.com/omarelkhal/aftertone/main/docs/demo-poster.svg">
+    <a href="https://raw.githubusercontent.com/omarelkhal/aftertone/main/docs/demo.mp4">Download demo (MP4)</a>
+  </video>
 </p>
 <p align="center"><sub>Claude Code with <code>/aftertone_on</code> — short question and clone-a-repo; hear the spoken summary when each reply finishes.</sub></p>
 

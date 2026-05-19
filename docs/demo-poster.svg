@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" aria-label="Watch Aftertone demo">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1916"/>
+      <stop offset="100%" stop-color="#2a241f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="48" y="48" width="1184" height="624" rx="24" fill="none" stroke="#c96f2e" stroke-width="4" opacity="0.45"/>
+  <circle cx="640" cy="320" r="88" fill="#c96f2e" opacity="0.95"/>
+  <polygon points="610,270 610,370 710,320" fill="#fffcf8"/>
+  <text x="640" y="470" text-anchor="middle" fill="#f5efe6" font-family="system-ui,Segoe UI,sans-serif" font-size="42" font-weight="600">Watch the demo</text>
+  <text x="640" y="530" text-anchor="middle" fill="#a89f94" font-family="system-ui,Segoe UI,sans-serif" font-size="26">Short response · Long task · Local TTS after Claude Code</text>
+  <text x="640" y="620" text-anchor="middle" fill="#c96f2e" font-family="system-ui,Segoe UI,sans-serif" font-size="22">omarelkhal.github.io/aftertone</text>
+</svg>

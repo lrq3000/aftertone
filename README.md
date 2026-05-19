@@ -14,11 +14,15 @@
 </p>
 
 <p align="center">
-  <video src="https://omarelkhal.github.io/aftertone/demo.mp4" controls width="720" playsinline>
-    <a href="https://omarelkhal.github.io/aftertone/demo.mp4">Watch the demo</a>
-  </video>
+  <a href="https://omarelkhal.github.io/aftertone/#demo">
+    <img src="docs/demo-poster.svg" alt="Watch Aftertone demo — short dev question and clone-a-repo task with local spoken summaries" width="720" />
+  </a>
 </p>
-<p align="center"><sub>Short dev question and clone-a-repo task — local spoken summaries after Claude Code replies (<code>/aftertone_on</code>).</sub></p>
+<p align="center">
+  <strong><a href="https://omarelkhal.github.io/aftertone/#demo">▶ Watch the demo</a></strong>
+  · <a href="https://omarelkhal.github.io/aftertone/demo.mp4">Download MP4</a>
+</p>
+<p align="center"><sub>Claude Code with <code>/aftertone_on</code> — short question and clone-a-repo; hear the spoken summary when each reply finishes.</sub></p>
 
 ## Adapters
 

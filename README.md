@@ -15,7 +15,11 @@
 
 <p align="center"><sub>Demo — Claude Code with <code>/aftertone_on</code> (short question + clone-a-repo). Unmute for audio.</sub></p>
 
-https://github.com/omarelkhal/aftertone/releases/download/demo-asset/demo.mp4
+
+
+https://github.com/user-attachments/assets/1db0c1d2-4643-48f4-81a4-86db2874e462
+
+
 
 <p align="center"><sub>Hear the spoken summary when each reply finishes. For an <strong>embedded player</strong> on this page, edit README on github.com and drag <code>docs/demo.mp4</code> onto a blank line — see <a href="docs/README-video-embed.md">README-video-embed.md</a>.</sub></p>
 

@@ -12,6 +12,7 @@
 ## Commands
 
 - One-line install: `curl -fsSL .../install.sh | bash -s -- --install-uv --start-daemon` → **`~/aftertone`** + **user hooks** in `~/.cursor/hooks.json` (default `--global`). Legacy per-project: `--no-global --into .`. See `scripts/install.sh`.
+- **Uninstall (Linux):** `curl -fsSL .../scripts/uninstall.sh | bash` or `bash scripts/uninstall.sh` — stops daemon, removes `~/.cursor` Aftertone hooks/commands/rule; deletes install dir unless `--keep-dir`. Windows script not shipped yet.
 - Bootstrap: `bash scripts/bootstrap.sh` from repo root.
 - Daemon: `cd py && uv run python tts_daemon_ctl.py start --repo-root ..`
 - **User config:** slash `/aftertone-*` only ([`.cursor/commands/`](.cursor/commands/)). Agent runs **one** `python -m aftertone …` from the install root — no planning preamble, no bash `aftertone-root.sh`, no hand-edited TOML. **lang/speed/mode/voice** without a value: **AskQuestion** first; **voice** uses `aftertone set voice PRESET --ensure` (daemon restart is default).
@@ -45,7 +46,8 @@
 
 ## Learned User Preferences
 
-- **Spoken summaries** should sound like a **hybrid pair-programmer briefing** for vibe coding: lead with **state** (what happened), add **significance** when it changes what to think, add a **next move** only for blockers, risk, tests, decisions, or clear actions — calm, direct tone; no file paths or filler in `<spoken_summary>`. For **livelier Supertonic delivery**, end **each sentence** inside the tag with `!!`, `??`, `?!`, or `!?` (vary them); do **not** use `state="..."` on the tag — inline expression tags were too subtle to hear.
+- **Spoken summaries** should sound like a **hybrid pair-programmer briefing** for vibe coding: lead with **state** (what happened), add **significance** when it changes what to think, add a **next move** only for blockers, risk, tests, decisions, or clear actions — calm, direct tone; no file paths or filler in `<spoken_summary>`. Put **one** tag at the **very end** of the message; do not leave bare `<spoken_summary>` in code citations or prose above it (the hook pairs the last `</spoken_summary>` with the nearest open tag). For **livelier Supertonic delivery**, end **each sentence** inside the tag with `!!`, `??`, `?!`, or `!?` (vary them); do **not** use `state="..."` on the tag — inline expression tags were too subtle to hear.
+- **Buy Me a Coffee:** use the official yellow button image (`cdn.buymeacoffee.com/buttons/v2/default-yellow.png`) in README and the docs site — not plain-text “Support” nav links.
 - For **`/aftertone-lang`**, **`/aftertone-speed`**, **`/aftertone-mode`**, and **`/aftertone-voice`** without a value in the message, the **first** tool call must be **AskQuestion** (picker only — no planning or shell before the picker); then **one** `aftertone set …` command.
 - Voice pickers and status should show **human names with gender**, e.g. `Sara (female)` / `James (male)` (`py/voice_presets.py`); TOML still uses `M1`/`F4` ids.
 - Public README and site adapter tables should list only **Cursor, Claude Code, Codex, and OpenCode** (not other agent brands).
@@ -59,3 +61,6 @@
 - **`/aftertone-restart`** restarts the TTS daemon when **port**, **voice_***, **onnx_dir**, or **use_gpu** change; **lang**, **speed**, **enabled**, and **expression_mode** apply on the next hook without restart.
 - **v2 (2.0):** `py/aftertone/` package, cross-platform CLI: `uv run --directory py python -m aftertone {on|off|status|repair|doctor|speak}`. Slash commands use the CLI, not bash `aftertone-root.sh` chains.
 - Repo **`speak_summary.toml` defaults:** `summary_mode = "tag_only"`, `only_speak_spoken_summary = true`, `total_step = 8`, `expression_mode = "off"`. Set `summary_mode = "auto"` for heuristic fallback when the model omits the tag.
+- **`<spoken_summary>` extraction:** `speak_summary_prepare.py` anchors on the **last** `</spoken_summary>` and the nearest `<spoken_summary>` before it — wrong audio usually means an unclosed tag mention earlier in the reply.
+- **Support:** https://buymeacoffee.com/elkhalomar — `.github/FUNDING.yml` (GitHub **Sponsor** button); README and Pages use the branded BMC button image.
+- **Supertonic ONNX weights:** pulled from [Supertone/supertonic-3](https://huggingface.co/Supertone/supertonic-3) under **OpenRAIL-M** (free local download/inference; not MIT for the model files). Aftertone project code remains MIT.

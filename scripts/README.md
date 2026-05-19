@@ -4,13 +4,13 @@
 |--------|----------|------|
 | **`install.sh`** | Linux / macOS | One-line install (clone or update, bootstrap, global hooks). [README](../README.md#linux--macos--one-line-install) |
 | **`install.ps1`** | Windows | Same flow in PowerShell. [README](../README.md#windows--one-line-install) |
+| **`uninstall.sh`** | Linux | Stop daemon, remove global Cursor hooks, optionally delete install tree. [README](../README.md#uninstall-linux) |
+| **`uninstall.ps1`** | Windows | Remove install dir, global hooks, daemon on port 8765 |
 | **`bootstrap.sh`** | Linux / macOS | `uv sync` in `py/`, download `Supertone/supertonic-3` into `assets/` when missing |
 | **`bootstrap.ps1`** | Windows | Same as `bootstrap.sh` (no bash required) |
-| **`uninstall.ps1`** | Windows | Remove install dir, global hooks, daemon on port 8765 |
 | **`repair-windows-hooks.ps1`** | Windows | Re-register global hooks, enable TTS, remove clashing project `hooks.json` |
 | **`aftertone-root.sh`** | all (bash) | Resolve install path; copied to `~/.cursor/hooks/` by install |
 | **`cursor-global/`** | all | Templates for `install_global_hooks.py` (`.cmd` + `hooks.windows.json`) |
-| **`repair-windows-hooks.ps1`** | Windows | Runs `python -m aftertone repair` |
 
 ## Aftertone v2 CLI
 
@@ -45,6 +45,18 @@ Python **3.13** is pinned in `py/.python-version` (onnxruntime wheels; avoid sys
 Env: `AFTERTONE_INSTALL_DIR`, `AFTERTONE_REPO_URL`, `AFTERTONE_BRANCH`.
 
 `bootstrap.sh` / `bootstrap.ps1` env: `SKIP_ASSETS=1`, `SKIP_WEB=1`, `FORCE_ASSETS=1`.
+
+## `uninstall.sh` options (Linux)
+
+| Flag | Meaning |
+|------|---------|
+| `--dir PATH` | Install root (default: `~/.cursor/hooks/aftertone-install-dir`, then `~/aftertone`) |
+| `--keep-dir` | Remove hooks only; keep clone and `assets/` |
+| `--no-global` | Skip `~/.cursor` cleanup (daemon stop + delete `--dir` only) |
+| `--yes` | Do not prompt before `rm -rf` install directory |
+| `--dry-run` | Print planned actions |
+
+Env: `AFTERTONE_INSTALL_DIR`, `AFTERTONE_UNINSTALL_RAW_BASE` (override raw GitHub URL prefix for hook scripts when the install tree is already gone).
 
 ## Windows prerequisites
 

@@ -1,12 +1,6 @@
 {
   "version": 1,
   "hooks": {
-    "afterAgentResponse": [
-      {
-        "command": "bash ../.cursor/hooks/speak_summary.sh",
-        "timeout": 8
-      }
-    ],
     "stop": [
       {
         "command": "bash ../.cursor/hooks/hook_payload_trace.sh",

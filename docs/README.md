@@ -4,8 +4,11 @@ Static site for [aftertone on GitHub Pages](https://omarelkhal.github.io/afterto
 
 - `index.html` — landing (includes `demo.mp4` walkthrough)
 - `demo.mp4` — short + long task demo (~6 MB; served at `/demo.mp4` on Pages)
-- `docs.html` — install, slash commands (Cursor + Claude), CLI, troubleshooting
-- `adapters/claude.md` — Claude Code adapter (linked from docs; source on GitHub)
+- `docs.html` — install, slash commands, CLI, adapters, troubleshooting
+- `adapters/claude.md` — Claude Code adapter
+- `adapters/codex.md` — Codex adapter
+- `adapters/opencode.md` — OpenCode adapter
+- `adapters/generic.md` — generic adapter template for future harnesses
 
 | File | URL |
 |------|-----|

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
+from aftertone.adapters import assistant_text, hook_event_name, transcript_path
 from aftertone.spoken_tag import parse_spoken_summary
 
 
@@ -46,27 +46,21 @@ def assistant_text_blocks(lines: list[str]) -> str:
 
 
 def hook_inline_text(hook: dict) -> str:
-    # Claude Code Stop / SubagentStop (https://code.claude.com/docs/en/hooks#stop)
-    lam = hook.get("last_assistant_message")
-    if isinstance(lam, str) and lam.strip():
-        return lam.strip()
-    for key in ("text", "response", "message", "content"):
-        v = hook.get(key)
-        if isinstance(v, str) and v.strip():
-            return v.strip()
-    return ""
+    return assistant_text(hook)
 
 
 def transcript_assistant_text(hook: dict) -> str:
-    transcript = hook.get("transcript_path") or os.environ.get("CURSOR_TRANSCRIPT_PATH")
-    if not transcript or not os.path.isfile(transcript):
+    transcript = transcript_path(hook)
+    if not transcript or not Path(transcript).is_file():
         return ""
     with open(transcript, encoding="utf-8", errors="replace") as f:
         return assistant_text_blocks(f.readlines())
 
 
 def resolve_raw_text(hook: dict, event: str) -> str:
-    if event in ("afterAgentResponse", "Stop", "SubagentStop"):
+    from aftertone.adapters import POST_REPLY_EVENTS
+
+    if event in POST_REPLY_EVENTS:
         inline = hook_inline_text(hook)
         if inline:
             if parse_spoken_summary(inline)[0]:
@@ -74,11 +68,6 @@ def resolve_raw_text(hook: dict, event: str) -> str:
             from_transcript = transcript_assistant_text(hook)
             if from_transcript and parse_spoken_summary(from_transcript)[0]:
                 return from_transcript
-            if event == "afterAgentResponse":
-                return inline
+            return inline
         return transcript_assistant_text(hook)
     return transcript_assistant_text(hook)
-
-
-def hook_event_name(hook: dict) -> str:
-    return str(hook.get("hook_event_name") or hook.get("hookEventName") or "")

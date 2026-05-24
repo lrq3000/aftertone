@@ -11,6 +11,7 @@ import urllib.error
 import urllib.request
 from datetime import datetime
 
+from aftertone.adapters import POST_REPLY_EVENTS
 from aftertone.config import cfg_enabled, load_config, summary_mode
 from aftertone.extract import hook_event_name, resolve_raw_text
 from aftertone.sessions import process_pending_from_hook, session_allows_speech
@@ -19,10 +20,8 @@ from aftertone.paths import install_root, state_dir
 from aftertone.summary import build_speakable_text
 from aftertone.text_utils import cfg_float_bounded, cfg_int_bounded, in_quiet_hours
 
-# Post-response hook events that may carry assistant text (Cursor vs Claude Code).
-_RESPONSE_HOOK_EVENTS = frozenset(
-    {"afterAgentResponse", "Stop", "SubagentStop"}
-)
+# Post-response hook events that may carry assistant text from any adapter.
+_RESPONSE_HOOK_EVENTS = POST_REPLY_EVENTS
 
 
 def prepare_payload(hook: dict, cfg: dict | None = None, root=None) -> dict | None:

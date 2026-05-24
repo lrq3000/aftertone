@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Free local TTS after your coding agent replies. No API keys, no subscription, no cloud TTS — one install command. Cursor hooks and Supertonic ONNX on your machine." />
+  <meta name="description" content="Free local TTS after your coding agent replies. No API keys, no subscription, no cloud TTS — one install command. Agent hooks/plugins and Supertonic ONNX on your machine." />
   <link rel="canonical" href="https://omarelkhal.github.io/aftertone/" />
   <meta name="theme-color" content="#c96f2e" />
   <title>Aftertone — free local voice after your coding agent answers</title>
   <meta property="og:title" content="Aftertone — hear your agent after it answers" />
-  <meta property="og:description" content="Free local TTS for coding agents. No API keys or subscription — install once and hear short summaries. Cursor hooks, Supertonic ONNX on your machine." />
+  <meta property="og:description" content="Free local TTS for coding agents. No API keys or subscription — install once and hear short summaries. Agent hooks/plugins, Supertonic ONNX on your machine." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://omarelkhal.github.io/aftertone/" />
   <meta property="og:image" content="https://raw.githubusercontent.com/omarelkhal/aftertone/main/img/aftertone-logo.png" />
@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Aftertone","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"Free local text-to-speech after AI coding agents finish a reply. No API keys or subscription; one install command. Cursor hooks and a localhost ONNX daemon.","url":"https://omarelkhal.github.io/aftertone/","codeRepository":"https://github.com/omarelkhal/aftertone","license":"https://github.com/omarelkhal/aftertone/blob/main/LICENSE","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"Aftertone","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Windows","description":"Free local text-to-speech after AI coding agents finish a reply. No API keys or subscription; one install command. Agent hooks/plugins and a localhost ONNX daemon.","url":"https://omarelkhal.github.io/aftertone/","codeRepository":"https://github.com/omarelkhal/aftertone","license":"https://github.com/omarelkhal/aftertone/blob/main/LICENSE","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
   </script>
 </head>
 <body>
@@ -89,7 +89,7 @@
         <li><strong>$0</strong> — open source; optional donations only, not a paywall</li>
         <li><strong>No API keys</strong> — audio is synthesized on localhost only</li>
         <li><strong>No subscription</strong> for Aftertone — one install, every project</li>
-        <li><strong>One command</strong> — uv, models, hooks, and daemon; then enable Hooks in Cursor</li>
+        <li><strong>One command</strong> — uv, models, hooks, plugins, and daemon; then enable/trust your harness</li>
         <li><strong>Many languages</strong> — pick with <code>/aftertone-lang</code>; write the spoken tag in that language</li>
       </ul>
 
@@ -105,7 +105,7 @@
         <p class="hero-install-note">
           <strong>Free install</strong> — no API keys, no Aftertone subscription, no cloud TTS account.
           One command installs uv, models, hooks, and the daemon to <code>~/aftertone</code> or <code>%USERPROFILE%\aftertone</code>.
-          In Cursor: enable Hooks and trust your workspace — spoken TTS is already on in config.
+          In Cursor: enable Hooks and trust your workspace. In Codex: trust the hook if prompted. In OpenCode: restart once so the plugin loads.
         </p>
       </div>
 
@@ -118,7 +118,7 @@
         <div class="flow-step">
           <span class="flow-step-num">1</span>
           <h3>Agent replies</h3>
-          <p>Cursor runs your coding agent; the reply lands in the hook payload.</p>
+          <p>Your agent finishes; Cursor, Claude Code, Codex, or OpenCode emits a post-reply payload.</p>
         </div>
         <span class="flow-arrow" aria-hidden="true">→</span>
         <div class="flow-step">
@@ -201,8 +201,8 @@
             <p>The heavy work lives in <code>tts_daemon.py</code>. Each hook only prepares text and posts JSON. On Windows, Cursor may delay calling hooks longer than on Linux or macOS — see <a href="docs.html#windows-hook-latency">docs</a>.</p>
           </article>
           <article class="card">
-            <h3>Cursor &amp; Claude Code</h3>
-            <p>Cursor <code>afterAgentResponse</code> and Claude Code <strong>Stop</strong> hooks — same daemon. Codex and OpenCode on the roadmap.</p>
+            <h3>Cursor, Claude, Codex, OpenCode</h3>
+            <p>Cursor <code>afterAgentResponse</code>, Claude Code and Codex <strong>Stop</strong> hooks, and an OpenCode plugin — same daemon.</p>
           </article>
           <article class="card">
             <h3>Slash commands</h3>

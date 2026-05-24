@@ -7,6 +7,7 @@ Modular package for post-reply TTS. The hook calls `aftertone.prepare`; control 
 | `config.py` | TOML load, `summary_mode` (`tag_only` default / `auto` / `heuristic`) |
 | `defaults.py` | Install defaults: `tag_only`, `total_step = 8`, full tag (`spoken_summary_max_sentences = 0`) |
 | `hook_json.py` | UTF-16 stdin, Windows JSON path escapes |
+| `adapters.py` | Normalize Cursor, Claude, Codex, OpenCode, and generic post-reply payloads |
 | `extract.py` | Hook + transcript text resolution |
 | `summary.py` | Tag vs auto-extract router |
 | `prepare.py` | Build `/say` JSON from hook stdin |

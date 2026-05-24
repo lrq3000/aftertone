@@ -27,9 +27,9 @@ https://github.com/user-attachments/assets/1db0c1d2-4643-48f4-81a4-86db2874e462
 
 | | Cursor | Claude Code | Codex | OpenCode |
 |---|:---:|:---:|:---:|:---:|
-| Status | ✅ | ✅ | soon | soon |
+| Status | ✅ | ✅ | ✅ | ✅ |
 
-Same `tts_daemon` for all — each adapter runs a hook when a reply finishes. [Claude setup](docs/adapters/claude.md) · [Contributing](CONTRIBUTING.md)
+Same `tts_daemon` for all — each adapter runs a hook when a reply finishes. [Claude setup](docs/adapters/claude.md) · [Codex](docs/adapters/codex.md) · [OpenCode](docs/adapters/opencode.md) · [Generic template](docs/adapters/generic.md)
 
 ## Install
 
@@ -53,6 +53,8 @@ Installs to `~/aftertone` (or `%USERPROFILE%\aftertone`), downloads models, regi
 |------|--------|
 | **Cursor** | Settings → **Hooks** on · **trust** the workspace |
 | **Claude Code** | `claude` → `/aftertone_on` in each chat where you want speech |
+| **Codex** | Restart Codex if needed → trust the Aftertone hook in `/hooks` if prompted |
+| **OpenCode** | Restart OpenCode so the global plugin loads |
 
 Agents should end substantive replies with `<spoken_summary>…</spoken_summary>` (repo default: **tag only** — no tag, no speech). See [spoken-summary rule](.cursor/rules/spoken-summary.mdc).
 
@@ -64,7 +66,7 @@ Type `/` in Agent chat. **Do not** hand-edit TOML for everyday changes.
 
 ### Per-session on/off
 
-**`/aftertone-on`** and **`/aftertone-off`** (Claude: `/aftertone_on` / `/aftertone_off`) apply to **this chat only**. Run **`/aftertone-on`** in each Composer or Claude session where you want speech; other sessions stay silent until you enable them there too. After **`/aftertone-on`**, send any agent reply so the hook can register that session.
+**`/aftertone-on`** and **`/aftertone-off`** (Claude: `/aftertone_on` / `/aftertone_off`; Codex/OpenCode: `python -m aftertone on|off`) apply to **this chat only**. Run the matching control in each session where you want speech; other sessions stay silent until you enable them there too. After enabling, send any agent reply so the hook can register that session.
 
 | Cursor | Claude Code |
 |--------|-------------|

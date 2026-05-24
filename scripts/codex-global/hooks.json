@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash __AFTERTONE_CODEX_STOP__",
+            "timeout": 30,
+            "statusMessage": "Speaking Aftertone summary"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash __AFTERTONE_CODEX_STOP__",
+            "timeout": 30,
+            "statusMessage": "Speaking Aftertone subagent summary"
+          }
+        ]
+      }
+    ]
+  }
+}

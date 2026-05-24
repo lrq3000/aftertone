@@ -13,8 +13,9 @@ Thanks for helping make **local, private “hear the gist”** work across more 
 |------|--------|-------------|
 | **Cursor** `afterAgentResponse` + `tts_daemon` | Shipped | Bugfixes, docs, Windows audio edge cases |
 | **Claude Code** (`Stop` hook + slash commands) | Shipped — [docs/adapters/claude.md](docs/adapters/claude.md) | [Contributor todos — Claude](#claude-code-contributor-todos) |
-| **OpenAI Codex** (CLI / IDE) | Not shipped | [Contributor todos — Codex](#openai-codex-contributor-todos) |
-| **OpenCode**, **GitHub Copilot**, **Windsurf**, **JetBrains AI**, **Zed**, **Cline**, **Continue** | Not shipped | Same pattern: final assistant text → `speak_summary_prepare.py` or `POST /say` |
+| **OpenAI Codex** (CLI / IDE) | Shipped — [docs/adapters/codex.md](docs/adapters/codex.md) | Hook trust and edge-case reports welcome |
+| **OpenCode** | Shipped — [docs/adapters/opencode.md](docs/adapters/opencode.md) | Plugin event-shape hardening welcome |
+| **Future harnesses** | Template — [docs/adapters/generic.md](docs/adapters/generic.md) | Same pattern: final assistant text → normalized payload → shared daemon |
 | **Core** daemon + ONNX pipeline | Shipped | Performance, GPU docs, packaging |
 
 Optional **MCP control plane** (on/off, status, `set`, restart) lives in `py/aftertone/mcp_server.py` and [`scripts/cursor-global/mcp.aftertone.json`](scripts/cursor-global/mcp.aftertone.json). It delegates to `python -m aftertone` — **not** the post-reply speech trigger. Cursor uses **slash commands** for control; Claude/Codex adapters should reuse the same CLI and optionally expose MCP where the host supports it.
@@ -45,12 +46,12 @@ Docs / PR:
 
 Speech (required):
 
-- [ ] **Research** — Codex CLI / IDE “response complete” lifecycle, stdin/stdout hooks, or extension points; capture findings in an issue or `docs/adapters/codex.md`.
-- [ ] **Payload** — Same contract as Cursor: prepared line → daemon (`speak_summary_prepare.py` or direct `/say` with compatible JSON).
-- [ ] **Install path** — Wrapper or config snippet that works on **Windows and Linux** (no bash-only assumptions unless documented).
-- [ ] **Config** — Shared `speak_summary.toml` under install `.cursor/hooks/`.
-- [ ] **Model guidance** — Spoken-summary tag / `summary_mode` docs for Codex agents.
-- [ ] **Smoke test** — Document or automate daemon + hook + audio check.
+- [x] **Research** — Codex lifecycle hooks include `Stop` / `SubagentStop`; see [`docs/adapters/codex.md`](docs/adapters/codex.md).
+- [x] **Payload** — Codex Stop payloads feed the normalized adapter contract through `aftertone.adapters`.
+- [x] **Install path** — Global install merges `~/.codex/hooks.json` and copies `~/.cursor/hooks/aftertone-codex-speak-on-stop.sh`.
+- [x] **Config** — Shared `speak_summary.toml` under install `.cursor/hooks/`.
+- [x] **Model guidance** — Spoken-summary tag / `summary_mode` docs for Codex agents.
+- [x] **Smoke test** — Documented daemon + hook trust + audio checks.
 
 Control (optional):
 
@@ -60,8 +61,22 @@ Control (optional):
 
 Docs / PR:
 
-- [ ] README adapter row + “Codex setup” when hook path is proven.
+- [x] README adapter row + “Codex setup” when hook path is proven.
 - [ ] Docs-only research PR welcome first.
+
+## OpenCode — contributor todos
+
+Speech:
+
+- [x] **Research** — OpenCode plugins can subscribe to session/message lifecycle events; see [`docs/adapters/opencode.md`](docs/adapters/opencode.md).
+- [x] **Payload** — OpenCode plugin emits `adapter = "opencode"` and `hook_event_name = "aftertone.response"`.
+- [x] **Install path** — Global install copies `~/.config/opencode/plugins/aftertone.js` and a spoken-summary rule.
+- [x] **Config** — Shared `speak_summary.toml` under install `.cursor/hooks/`.
+- [ ] **Hardening** — If OpenCode event payloads change, update only `scripts/opencode-global/aftertone-plugin.js` and tests.
+
+## Future harnesses
+
+Start with [`docs/adapters/generic.md`](docs/adapters/generic.md). New adapters should keep the harness glue thin and emit the normalized payload consumed by `aftertone.adapters`.
 
 ## Principles
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Remove Aftertone user-level Cursor hooks (~/.cursor/hooks.json)."""
+"""Remove Aftertone user-level hooks/plugins for supported adapters."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 from install_global_claude_hooks import _strip_aftertone_entries as _strip_claude_entries
+from install_global_codex_hooks import _strip_aftertone_entries as _strip_codex_entries
 from install_global_hooks import _strip_aftertone_entries as _strip_cursor_entries
 
 
@@ -59,6 +60,30 @@ def _remove_claude_hook_entries(settings: dict) -> tuple[dict, int]:
     return out, removed
 
 
+def _count_codex_aftertone(hooks: dict) -> int:
+    n = 0
+    for entries in hooks.values():
+        if not isinstance(entries, list):
+            continue
+        for group in entries:
+            if not isinstance(group, dict):
+                continue
+            for h in group.get("hooks") or []:
+                if isinstance(h, dict) and "aftertone-codex-speak-on-stop" in (
+                    h.get("command") or ""
+                ):
+                    n += 1
+    return n
+
+
+def _remove_codex_hook_entries(settings: dict) -> tuple[dict, int]:
+    out = dict(settings)
+    hooks = dict(out.get("hooks") or {})
+    removed = _count_codex_aftertone(hooks)
+    out["hooks"] = _strip_codex_entries(hooks)
+    return out, removed
+
+
 def uninstall_global(*, dry_run: bool = False) -> None:
     user_cursor = Path.home() / ".cursor"
     user_hooks = user_cursor / "hooks"
@@ -69,6 +94,14 @@ def uninstall_global(*, dry_run: bool = False) -> None:
     claude_skill = user_claude / "skills" / "spoken-summary" / "SKILL.md"
     claude_rule = user_claude / "rules" / "spoken-summary.md"
 
+    user_codex = Path.home() / ".codex"
+    codex_hooks_json = user_codex / "hooks.json"
+
+    user_opencode = Path.home() / ".config" / "opencode"
+    opencode_plugin = user_opencode / "plugins" / "aftertone.js"
+    opencode_rule = user_opencode / "rules" / "aftertone-spoken-summary.md"
+    opencode_marker = user_opencode / "aftertone-install-dir"
+
     hook_files = [
         user_hooks / "aftertone-install-dir",
         user_hooks / "aftertone-speak_summary.sh",
@@ -76,6 +109,7 @@ def uninstall_global(*, dry_run: bool = False) -> None:
         user_hooks / "aftertone-root.sh",
         user_hooks / "aftertone-claude-speak-on-stop.sh",
         user_hooks / "aftertone-claude-doctor-quiet.sh",
+        user_hooks / "aftertone-codex-speak-on-stop.sh",
         user_hooks / "aftertone-activate.sh",
         user_hooks / "aftertone-off.sh",
         user_hooks / "aftertone-status.sh",
@@ -107,6 +141,11 @@ def uninstall_global(*, dry_run: bool = False) -> None:
                 print(f"would remove {p}")
         if claude_settings.is_file():
             print(f"would strip Aftertone from {claude_settings}")
+        if codex_hooks_json.is_file():
+            print(f"would strip Aftertone from {codex_hooks_json}")
+        for path in (opencode_plugin, opencode_rule, opencode_marker):
+            if path.is_file():
+                print(f"would remove {path}")
         if claude_skill.is_file():
             print(f"would remove {claude_skill}")
         if claude_rule.is_file():
@@ -180,6 +219,27 @@ def uninstall_global(*, dry_run: bool = False) -> None:
         claude_rule.unlink()
         print(f"removed: {claude_rule}")
 
+    removed_codex = 0
+    if codex_hooks_json.is_file():
+        existing = json.loads(codex_hooks_json.read_text(encoding="utf-8"))
+        updated, removed_codex = _remove_codex_hook_entries(existing)
+        if removed_codex:
+            backup = codex_hooks_json.with_suffix(f".json.bak.{int(time.time())}")
+            shutil.copy2(codex_hooks_json, backup)
+            if updated.get("hooks"):
+                codex_hooks_json.write_text(
+                    json.dumps(updated, indent=2) + "\n", encoding="utf-8"
+                )
+            else:
+                codex_hooks_json.unlink()
+            print(f"backup: {backup}")
+            print(f"removed {removed_codex} Codex Stop hook(s) from {codex_hooks_json}")
+
+    for path in (opencode_plugin, opencode_rule, opencode_marker):
+        if path.is_file():
+            path.unlink()
+            print(f"removed: {path}")
+
     if removed_hooks:
         print(f"removed {removed_hooks} afterAgentResponse hook(s) from {user_hooks_json}")
     elif user_hooks_json_exists:
@@ -190,7 +250,7 @@ def uninstall_global(*, dry_run: bool = False) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(
-        description="Uninstall Aftertone user-level Cursor hooks."
+        description="Uninstall Aftertone user-level adapter hooks."
     )
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()

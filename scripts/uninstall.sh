@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Remove a global Aftertone install on Linux (Cursor hooks + optional install tree).
+# Remove a global Aftertone install on Linux (agent hooks/plugins + optional install tree).
 #
 #   curl -fsSL https://raw.githubusercontent.com/omarelkhal/aftertone/main/scripts/uninstall.sh | bash
 #
@@ -23,7 +23,7 @@ DRY_RUN=0
 
 usage() {
   cat <<'EOF'
-Aftertone uninstall (Linux) — stop daemon, remove user Cursor hooks, delete install tree.
+Aftertone uninstall (Linux) — stop daemon, remove user agent hooks/plugins, delete install tree.
 
 One-liner:
   curl -fsSL https://raw.githubusercontent.com/omarelkhal/aftertone/main/scripts/uninstall.sh | bash
@@ -170,7 +170,7 @@ run_uninstall_global_hooks() {
 }
 
 uninstall_global_hooks() {
-  echo "==> uninstall: removing user-level Cursor hooks (~/.cursor)…"
+  echo "==> uninstall: removing user-level agent hooks/plugins…"
   local flags=()
   [[ "${DRY_RUN}" == "1" ]] && flags+=(--dry-run)
   if run_uninstall_global_hooks "${flags[@]}"; then

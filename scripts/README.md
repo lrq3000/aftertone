@@ -4,14 +4,16 @@
 |--------|----------|------|
 | **`install.sh`** | Linux / macOS | One-line install (clone or update, bootstrap, global hooks). [README](../README.md#linux--macos--one-line-install) |
 | **`install.ps1`** | Windows | Same flow in PowerShell. [README](../README.md#windows--one-line-install) |
-| **`uninstall.sh`** | Linux | Stop daemon, remove global Cursor hooks, optionally delete install tree. [README](../README.md#uninstall-linux) |
-| **`uninstall.ps1`** | Windows | Stop daemon, remove global Cursor hooks, optionally delete install tree. [README](../README.md#uninstall) |
+| **`uninstall.sh`** | Linux | Stop daemon, remove global agent hooks/plugins, optionally delete install tree. [README](../README.md#uninstall-linux) |
+| **`uninstall.ps1`** | Windows | Stop daemon, remove global agent hooks/plugins, optionally delete install tree. [README](../README.md#uninstall) |
 | **`bootstrap.sh`** | Linux / macOS | `uv sync` in `py/`, download `Supertone/supertonic-3` into `assets/` when missing |
 | **`bootstrap.ps1`** | Windows | Same as `bootstrap.sh` (no bash required) |
 | **`repair-windows-hooks.ps1`** | Windows | Re-register global hooks, enable TTS, remove clashing project `hooks.json` |
 | **`aftertone-root.sh`** | all (bash) | Resolve install path; copied to `~/.cursor/hooks/` by install |
 | **`aftertone_on`** | Linux / macOS | Start Claude Code with the Aftertone plugin (`~/.local/bin/aftertone_on` after install) |
 | **`cursor-global/`** | all | Templates for `install_global_hooks.py` (`.cmd` + `hooks.windows.json`) |
+| **`codex-global/`** | all | Templates for Codex Stop / SubagentStop hooks |
+| **`opencode-global/`** | all | Templates for the OpenCode global plugin and spoken-summary rule |
 
 ## Aftertone v2 CLI
 
@@ -33,8 +35,8 @@ Python **3.13** is pinned in `py/.python-version` (onnxruntime wheels; avoid sys
 | `install.sh` | `install.ps1` | Meaning |
 |--------------|---------------|---------|
 | `--dir PATH` | `-InstallDir PATH` | Clone location (default `~/aftertone` or `%USERPROFILE%\aftertone`) |
-| `--global` | (default) | Register user hooks in `.cursor/` |
-| `--no-global` | `-NoGlobal` | Skip `.cursor/hooks.json` registration |
+| `--global` | (default) | Register user hooks/plugins for supported adapters |
+| `--no-global` | `-NoGlobal` | Skip user hook/plugin registration |
 | `--into PATH` | — | **Legacy (bash only):** copy hooks + `py/` into another repo |
 | `--branch NAME` | `-Branch NAME` | Git branch (default `main`) |
 | `--skip-assets` | `-SkipAssets` | Skip model download |
@@ -53,7 +55,7 @@ Env: `AFTERTONE_INSTALL_DIR`, `AFTERTONE_REPO_URL`, `AFTERTONE_BRANCH`.
 |----------------|-----------------|---------|
 | `--dir PATH` | `-InstallDir PATH` | Install root (default: marker file, then `~/aftertone` or `%USERPROFILE%\aftertone`) |
 | `--keep-dir` | `-KeepDir` | Remove hooks only; keep clone and `assets/` |
-| `--no-global` | `-NoGlobal` | Skip user `.cursor` cleanup (daemon stop + delete install dir only) |
+| `--no-global` | `-NoGlobal` | Skip user hook/plugin cleanup (daemon stop + delete install dir only) |
 | `--yes` | `-Yes` | Do not prompt before deleting install directory |
 | `--dry-run` | `-DryRun` | Print planned actions |
 

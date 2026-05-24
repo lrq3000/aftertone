@@ -1,4 +1,4 @@
-# Remove a global Aftertone install on Windows (Cursor hooks + optional install tree).
+# Remove a global Aftertone install on Windows (agent hooks/plugins + optional install tree).
 #
 #   irm https://raw.githubusercontent.com/omarelkhal/aftertone/main/scripts/uninstall.ps1 | iex
 #   powershell -ExecutionPolicy Bypass -File scripts\uninstall.ps1
@@ -6,7 +6,7 @@
 #
 # Options:
 #   -InstallDir PATH   Install root (default: marker file, then %USERPROFILE%\aftertone)
-#   -KeepDir           Unregister Cursor hooks but keep the clone and assets
+#   -KeepDir           Unregister agent hooks/plugins but keep the clone and assets
 #   -NoGlobal          Skip %USERPROFILE%\.cursor cleanup (only stop daemon / remove -InstallDir)
 #   -Yes               Skip confirmation before deleting the install directory
 #   -DryRun            Print actions without changing anything
@@ -29,7 +29,7 @@ $DefaultInstallDir = Join-Path $env:USERPROFILE "aftertone"
 
 function Show-Help {
     @"
-Aftertone uninstall (Windows) — stop daemon, remove user Cursor hooks, delete install tree.
+Aftertone uninstall (Windows) — stop daemon, remove user agent hooks/plugins, delete install tree.
 
 One-liner:
   irm https://raw.githubusercontent.com/omarelkhal/aftertone/main/scripts/uninstall.ps1 | iex
@@ -208,7 +208,7 @@ function Invoke-UninstallGlobalHooks {
 }
 
 function Remove-GlobalHooks {
-    Write-Host "==> uninstall: removing user-level Cursor hooks ($env:USERPROFILE\.cursor)..."
+    Write-Host "==> uninstall: removing user-level agent hooks/plugins..."
     $flags = @()
     if ($DryRun) { $flags += "--dry-run" }
     $ok = Invoke-UninstallGlobalHooks -ExtraArgs $flags

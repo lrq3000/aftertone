@@ -7,7 +7,7 @@
 # Options:
 #   -InstallDir PATH     Clone location (default: $env:USERPROFILE\aftertone)
 #   -Branch NAME         Git branch (default: main)
-#   -NoGlobal            Skip user-level Cursor hooks
+#   -NoGlobal            Skip user-level hooks/plugins
 #   -SkipAssets          Skip Hugging Face model download
 #   -NoStartDaemon       Do not start tts_daemon after bootstrap
 #   -NoEnableTts         Leave speak_summary.toml enabled=false
@@ -122,7 +122,7 @@ function Invoke-Bootstrap {
 
 function Install-GlobalHooks {
     param([string] $Root)
-    Write-Host "==> install: user-level Cursor hooks ($env:USERPROFILE\.cursor)…"
+    Write-Host "==> install: user-level agent hooks (Cursor, Claude Code, Codex, OpenCode)…"
     Push-Location (Join-Path $Root "py")
     $pyArgs = Get-PythonVersionArg -Root $Root
     & uv run @pyArgs python install_global_hooks.py --install-dir $Root
@@ -201,7 +201,7 @@ function Show-NextSteps {
 
 ==> Aftertone is ready at: $Root
 
-Installed: Python deps, ONNX assets, user Cursor hooks, tts_daemon, spoken TTS enabled in config.
+Installed: Python deps, ONNX assets, user agent hooks/plugins, tts_daemon, spoken TTS enabled in config.
 Hooks file: $cursorHooks
 
 In Cursor only:
@@ -211,6 +211,11 @@ In Cursor only:
   4. Agents should end replies with <spoken_summary> (summary_mode=tag_only by default); use summary_mode=auto in speak_summary.toml for fallback speech
   5. Do not add project .cursor/hooks.json on Windows — use global hooks. Repair: uv run --directory py python -m aftertone repair
   6. Diagnose: uv run --directory py python -m aftertone doctor
+
+Other adapters:
+  - Claude Code: run claude, then /aftertone_on in each chat
+  - Codex: run /hooks and trust the Aftertone Stop hook if prompted
+  - OpenCode: restart OpenCode so %USERPROFILE%\.config\opencode\plugins\aftertone.js loads
 
 Docs: $Root\README.md
 "@

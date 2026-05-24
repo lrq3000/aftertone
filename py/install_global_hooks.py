@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Register Aftertone user-level Cursor hooks (~/.cursor/hooks.json)."""
+"""Register Aftertone user-level hooks/plugins for supported adapters."""
 
 from __future__ import annotations
 
@@ -182,9 +182,27 @@ def install_global(*, install_dir: Path, dry_run: bool = False) -> None:
     except Exception as exc:
         print(f"Claude Code hooks: skipped ({exc})", file=sys.stderr)
 
+    try:
+        from install_global_codex_hooks import install_global_codex
+
+        install_global_codex(install_dir=install_dir, dry_run=dry_run)
+    except SystemExit as exc:
+        print(f"Codex hooks: skipped ({exc})", file=sys.stderr)
+    except Exception as exc:
+        print(f"Codex hooks: skipped ({exc})", file=sys.stderr)
+
+    try:
+        from install_global_opencode_hooks import install_global_opencode
+
+        install_global_opencode(install_dir=install_dir, dry_run=dry_run)
+    except SystemExit as exc:
+        print(f"OpenCode hooks: skipped ({exc})", file=sys.stderr)
+    except Exception as exc:
+        print(f"OpenCode hooks: skipped ({exc})", file=sys.stderr)
+
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Install Aftertone user-level Cursor hooks.")
+    p = argparse.ArgumentParser(description="Install Aftertone user-level adapter hooks.")
     p.add_argument("--install-dir", type=Path, required=True, help="Aftertone clone root")
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()

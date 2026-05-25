@@ -55,14 +55,52 @@ function findText(value, depth = 0) {
 
 function runAftertone(payload) {
   const root = installRoot()
-  const script = join(root, ".cursor", "hooks", "speak_summary.sh")
-  if (!existsSync(script)) return
-  const child = spawn("bash", [script], {
-    env: {
-      ...process.env,
-      AFTERTONE_REPO: root,
-      AFTERTONE_INSTALL_DIR: root,
-    },
+
+  const envPatch = {
+    ...process.env,
+    AFTERTONE_REPO: root,
+    AFTERTONE_INSTALL_DIR: root,
+  }
+
+  if (process.platform === "win32") {
+    // On Windows plain "bash" resolves to WSL which opens a visible terminal
+    // and closes immediately.  Route through the existing .cmd wrapper that
+    // finds Git Bash correctly and runs headless.
+    const cmdScript = join(root, ".cursor", "hooks", "speak_summary.cmd")
+    if (existsSync(cmdScript)) {
+      const child = spawn("cmd.exe", ["/c", cmdScript], {
+        env: envPatch,
+        stdio: ["pipe", "ignore", "ignore"],
+        windowsHide: true,
+        detached: true,
+      })
+      child.stdin.end(JSON.stringify(payload))
+      child.unref()
+      return
+    }
+    // Fallback: Git Bash at the standard install path.
+    const gitBash = join(process.env["ProgramFiles"] || "C:\\Program Files", "Git", "bin", "bash.exe")
+    if (existsSync(gitBash)) {
+      const bashScript = join(root, ".cursor", "hooks", "speak_summary.sh")
+      if (existsSync(bashScript)) {
+        const child = spawn(gitBash, [bashScript], {
+          env: envPatch,
+          stdio: ["pipe", "ignore", "ignore"],
+          windowsHide: true,
+          detached: true,
+        })
+        child.stdin.end(JSON.stringify(payload))
+        child.unref()
+        return
+      }
+    }
+  }
+
+  // Non-Windows — or Windows fallback when no .cmd / Git Bash found.
+  const shScript = join(root, ".cursor", "hooks", "speak_summary.sh")
+  if (!existsSync(shScript)) return
+  const child = spawn("bash", [shScript], {
+    env: envPatch,
     stdio: ["pipe", "ignore", "ignore"],
     windowsHide: true,
     detached: true,

@@ -13,12 +13,12 @@ Thanks for helping make **local, private “hear the gist”** work across more 
 |------|--------|-------------|
 | **Cursor** `afterAgentResponse` + `tts_daemon` | Shipped | Bugfixes, docs, Windows audio edge cases |
 | **Claude Code** (`Stop` hook + slash commands) | Shipped — [docs/adapters/claude.md](docs/adapters/claude.md) | [Contributor todos — Claude](#claude-code-contributor-todos) |
-| **OpenAI Codex** (CLI / IDE) | Shipped — [docs/adapters/codex.md](docs/adapters/codex.md) | Hook trust and edge-case reports welcome |
+| **OpenAI Codex** (CLI / IDE) | Shipped — [docs/adapters/codex.md](docs/adapters/codex.md) | Plugin hook trust and edge-case reports welcome |
 | **OpenCode** | Shipped — [docs/adapters/opencode.md](docs/adapters/opencode.md) | Plugin event-shape hardening welcome |
 | **Future harnesses** | Template — [docs/adapters/generic.md](docs/adapters/generic.md) | Same pattern: final assistant text → normalized payload → shared daemon |
 | **Core** daemon + ONNX pipeline | Shipped | Performance, GPU docs, packaging |
 
-Optional **MCP control plane** (on/off, status, `set`, restart) lives in `py/aftertone/mcp_server.py` and [`scripts/cursor-global/mcp.aftertone.json`](scripts/cursor-global/mcp.aftertone.json). It delegates to `python -m aftertone` — **not** the post-reply speech trigger. Cursor uses **slash commands** for control; Claude/Codex adapters should reuse the same CLI and optionally expose MCP where the host supports it.
+Optional **MCP control plane** lives in `py/aftertone/mcp_server.py`. It delegates to `python -m aftertone` — **not** the post-reply speech trigger. Cursor uses **slash commands** for control; Claude/Codex adapters should reuse the same CLI and expose MCP where the host supports it.
 
 ## Claude Code — contributor todos
 
@@ -34,7 +34,7 @@ Speech (required for “Aftertone works here”):
 Control (optional; same CLI as Cursor slash commands):
 
 - [ ] **MCP** — Register `aftertone.mcp_server` in Claude’s MCP config; point `uv run --directory <install>/py` at the global install root (see template JSON above).
-- [ ] **MCP parity** — Extend `mcp_server.py` tools to match `python -m aftertone` (`restart`, `repair`, `set lang|speed|mode|voice`, …) or generate tools from CLI subparsers so MCP and slash commands do not drift.
+- [x] **MCP parity** — `mcp_server.py` exposes the main CLI control surface (`restart`, `repair`, `set lang|speed|mode|voice|expression`, …).
 - [ ] **Do not** rely on MCP alone for post-reply speech — hooks (or equivalent lifecycle) must run every turn; agents may skip MCP tools.
 
 Docs / PR:
@@ -48,15 +48,17 @@ Speech (required):
 
 - [x] **Research** — Codex lifecycle hooks include `Stop` / `SubagentStop`; see [`docs/adapters/codex.md`](docs/adapters/codex.md).
 - [x] **Payload** — Codex Stop payloads feed the normalized adapter contract through `aftertone.adapters`.
-- [x] **Install path** — Global install merges `~/.codex/hooks.json` and copies `~/.cursor/hooks/aftertone-codex-speak-on-stop.sh`.
+- [x] **Install path** — Global install registers the Aftertone Codex marketplace and enables `aftertone@aftertone`; direct `~/.codex/hooks.json` install remains a compatibility fallback.
 - [x] **Config** — Shared `speak_summary.toml` under install `.cursor/hooks/`.
 - [x] **Model guidance** — Spoken-summary tag / `summary_mode` docs for Codex agents.
 - [x] **Smoke test** — Documented daemon + hook trust + audio checks.
 
 Control (optional):
 
-- [ ] **MCP** — Ship Codex MCP config snippet (install-root `py`, `python -m aftertone.mcp_server`) alongside speech adapter docs.
-- [ ] **MCP parity** — Same as Claude: full CLI surface via MCP tools; speech still via hook only.
+- [x] **Plugin path** — Global install registers the Aftertone Codex marketplace and enables `aftertone@aftertone`.
+- [x] **Lifecycle hooks** — The Codex plugin bundles `Stop` / `SubagentStop` hooks under `plugins/aftertone/hooks/hooks.json`.
+- [x] **MCP** — Codex plugin ships MCP control config backed by `python -m aftertone.mcp_server`.
+- [x] **MCP parity** — Same as Claude: the main CLI control surface is available via MCP tools; speech still uses lifecycle hooks.
 - [ ] **Do not** use MCP as the only way to speak after each reply.
 
 Docs / PR:

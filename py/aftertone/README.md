@@ -14,6 +14,6 @@ Modular package for post-reply TTS. The hook calls `aftertone.prepare`; control 
 | `sessions.py` | Per-chat allowlist (`enabled_sessions.json`, pending on/off) |
 | `cli.py` | Cross-platform `aftertone` commands |
 | `doctor.py` | Install / hook / daemon diagnostics |
-| `mcp_server.py` | Optional MCP control tools (not speech trigger); contributor todos in [CONTRIBUTING.md § Claude / Codex](https://github.com/omarelkhal/aftertone/blob/main/CONTRIBUTING.md#claude-code-contributor-todos) |
+| `mcp_server.py` | Optional MCP control tools (not the speech trigger); used by the Codex plugin and available for other adapters |
 
 Audit notes: [`docs/V2_AUDIT.md`](../../docs/V2_AUDIT.md).

@@ -65,7 +65,9 @@ def test_opencode_normalized_payload_accepts_output_text_alias() -> None:
     assert "generic adapter" in resolve_raw_text(hook, "aftertone.response")
 
 
-def test_generic_payload_prepares_speech_and_preserves_generation_metadata() -> None:
+def test_generic_payload_prepares_speech_and_preserves_generation_metadata(
+    tmp_path: Path,
+) -> None:
     hook = {
         "hook_event_name": "aftertone.response",
         "adapter": "generic",
@@ -85,7 +87,7 @@ def test_generic_payload_prepares_speech_and_preserves_generation_metadata() -> 
         "expression_mode": "off",
     }
 
-    out = prepare_payload(hook, cfg)
+    out = prepare_payload(hook, cfg, tmp_path / "repo")
 
     assert out is not None
     assert "Generic harness" in out["text"]
@@ -93,7 +95,9 @@ def test_generic_payload_prepares_speech_and_preserves_generation_metadata() -> 
     assert out["conversation_id"] == "conv-123"
 
 
-def test_generic_payload_auto_mode_can_use_inline_text_without_tag() -> None:
+def test_generic_payload_auto_mode_can_use_inline_text_without_tag(
+    tmp_path: Path,
+) -> None:
     hook = {
         "hook_event_name": "aftertone.response",
         "adapter": "generic",
@@ -112,7 +116,7 @@ def test_generic_payload_auto_mode_can_use_inline_text_without_tag() -> None:
         "expression_mode": "off",
     }
 
-    out = prepare_payload(hook, cfg)
+    out = prepare_payload(hook, cfg, tmp_path / "repo")
 
     assert out is not None
     assert "generic adapter" in out["text"]

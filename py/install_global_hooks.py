@@ -183,13 +183,29 @@ def install_global(*, install_dir: Path, dry_run: bool = False) -> None:
         print(f"Claude Code hooks: skipped ({exc})", file=sys.stderr)
 
     try:
-        from install_global_codex_hooks import install_global_codex
+        from install_global_codex_plugin import install_global_codex_plugin
 
-        install_global_codex(install_dir=install_dir, dry_run=dry_run)
+        install_global_codex_plugin(install_dir=install_dir, dry_run=dry_run)
     except SystemExit as exc:
-        print(f"Codex hooks: skipped ({exc})", file=sys.stderr)
+        print(f"Codex plugin: skipped ({exc})", file=sys.stderr)
+        try:
+            from install_global_codex_hooks import install_global_codex
+
+            install_global_codex(install_dir=install_dir, dry_run=dry_run)
+        except SystemExit as legacy_exc:
+            print(f"Codex hooks fallback: skipped ({legacy_exc})", file=sys.stderr)
+        except Exception as legacy_exc:
+            print(f"Codex hooks fallback: skipped ({legacy_exc})", file=sys.stderr)
     except Exception as exc:
-        print(f"Codex hooks: skipped ({exc})", file=sys.stderr)
+        print(f"Codex plugin: skipped ({exc})", file=sys.stderr)
+        try:
+            from install_global_codex_hooks import install_global_codex
+
+            install_global_codex(install_dir=install_dir, dry_run=dry_run)
+        except SystemExit as legacy_exc:
+            print(f"Codex hooks fallback: skipped ({legacy_exc})", file=sys.stderr)
+        except Exception as legacy_exc:
+            print(f"Codex hooks fallback: skipped ({legacy_exc})", file=sys.stderr)
 
     try:
         from install_global_opencode_hooks import install_global_opencode

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from install_global_claude_hooks import _strip_aftertone_entries as _strip_claude_entries
 from install_global_codex_hooks import _strip_aftertone_entries as _strip_codex_entries
+from install_global_codex_plugin import uninstall_global_codex_plugin
 from install_global_hooks import _strip_aftertone_entries as _strip_cursor_entries
 
 
@@ -143,6 +144,7 @@ def uninstall_global(*, dry_run: bool = False) -> None:
             print(f"would strip Aftertone from {claude_settings}")
         if codex_hooks_json.is_file():
             print(f"would strip Aftertone from {codex_hooks_json}")
+        uninstall_global_codex_plugin(dry_run=True)
         for path in (opencode_plugin, opencode_rule, opencode_marker):
             if path.is_file():
                 print(f"would remove {path}")
@@ -220,6 +222,7 @@ def uninstall_global(*, dry_run: bool = False) -> None:
         print(f"removed: {claude_rule}")
 
     removed_codex = 0
+    uninstall_global_codex_plugin(dry_run=False)
     if codex_hooks_json.is_file():
         existing = json.loads(codex_hooks_json.read_text(encoding="utf-8"))
         updated, removed_codex = _remove_codex_hook_entries(existing)

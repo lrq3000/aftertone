@@ -37,6 +37,12 @@ def test_utf16_hook_decode():
     assert loads_hook_json(decode_hook_bytes(utf16))["text"] == "hello"
 
 
+def test_force_adapter_env_override(monkeypatch):
+    monkeypatch.setenv("AFTERTONE_FORCE_ADAPTER", "codex")
+    hook = loads_hook_json('{"text":"hello"}')
+    assert hook["adapter"] == "codex"
+
+
 def test_auto_summary_without_tag():
     cfg = {
         "enabled": True,

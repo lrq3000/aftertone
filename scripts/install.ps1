@@ -122,7 +122,7 @@ function Invoke-Bootstrap {
 
 function Install-GlobalHooks {
     param([string] $Root)
-    Write-Host "==> install: user-level agent hooks (Cursor, Claude Code, Codex, OpenCode)…"
+    Write-Host "==> install: user-level agent integrations (Cursor, Claude Code, Codex, OpenCode)…"
     Push-Location (Join-Path $Root "py")
     $pyArgs = Get-PythonVersionArg -Root $Root
     & uv run @pyArgs python install_global_hooks.py --install-dir $Root
@@ -214,7 +214,7 @@ In Cursor only:
 
 Other adapters:
   - Claude Code: run claude, then /aftertone_on in each chat
-  - Codex: run /hooks and trust the Aftertone Stop hook if prompted
+  - Codex: restart Codex if it was already open, then run /hooks and trust the Aftertone Stop hook if prompted
   - OpenCode: restart OpenCode so %USERPROFILE%\.config\opencode\plugins\aftertone.js loads
 
 Docs: $Root\README.md

@@ -15,6 +15,15 @@
 | **`codex-global/`** | all | Templates for Codex Stop / SubagentStop hooks |
 | **`opencode-global/`** | all | Templates for the OpenCode global plugin and spoken-summary rule |
 
+## Codex plugin
+
+Aftertone now ships a repo-local Codex marketplace and plugin:
+
+- `.agents/plugins/marketplace.json`
+- `plugins/aftertone/`
+
+Global install enables that plugin in `~/.codex/config.toml`. The older `codex-global/` hook templates remain as a compatibility fallback for Codex builds that do not load plugin-bundled hooks correctly.
+
 ## Aftertone v2 CLI
 
 From install root (`~/aftertone` or `%USERPROFILE%\aftertone`):

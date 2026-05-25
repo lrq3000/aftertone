@@ -199,7 +199,7 @@ install_claude_user_commands() {
 install_global_hooks() {
   local root="$1"
   local vpy=""
-  echo "==> install: user-level agent hooks (Cursor, Claude Code, Codex, OpenCode)…"
+  echo "==> install: user-level agent integrations (Cursor, Claude Code, Codex, OpenCode)…"
   if [[ -x "${root}/py/.venv/Scripts/python.exe" ]]; then
     vpy="${root}/py/.venv/Scripts/python.exe"
   elif [[ -x "${root}/py/.venv/bin/python" ]]; then
@@ -270,7 +270,7 @@ Next:
   3. Daemon: cd ${root}/py && uv run python tts_daemon_ctl.py start --repo-root ..
   4. Turn on TTS: open ${root} and use /aftertone-on — or: uv run --directory ${root}/py python speak_summary_toggle.py on
   5. Claude Code: run \`claude\`, then in chat \`/aftertone_on\` (hooks in ~/.claude/settings.json from install)
-  6. Codex: run \`/hooks\` and trust the Aftertone Stop hook if prompted
+  6. Codex: restart Codex if it was already open, then run \`/hooks\` and trust the Aftertone Stop hook if prompted
   7. OpenCode: restart OpenCode so ~/.config/opencode/plugins/aftertone.js loads
 
 Docs: ${root}/README.md  ·  hooks: ${root}/.cursor/hooks/README.md  ·  adapters: ${root}/docs/adapters/

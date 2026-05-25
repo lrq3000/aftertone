@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 
 _INVALID_JSON_ESCAPE = re.compile(r'(?<!\\)\\(?!["\\/bfnrtu])')
@@ -23,11 +24,19 @@ def decode_hook_bytes(raw: bytes) -> str:
 def loads_hook_json(raw: str) -> dict:
     text = (raw or "").strip()
     if not text:
-        return {}
+        return _apply_env_overrides({})
     try:
         obj = json.loads(text)
-        return obj if isinstance(obj, dict) else {}
+        return _apply_env_overrides(obj if isinstance(obj, dict) else {})
     except json.JSONDecodeError:
         fixed = _INVALID_JSON_ESCAPE.sub(r"\\\\", text)
         obj = json.loads(fixed)
-        return obj if isinstance(obj, dict) else {}
+        return _apply_env_overrides(obj if isinstance(obj, dict) else {})
+
+
+def _apply_env_overrides(hook: dict) -> dict:
+    forced_adapter = os.environ.get("AFTERTONE_FORCE_ADAPTER", "").strip().lower()
+    if forced_adapter and not hook.get("adapter"):
+        hook = dict(hook)
+        hook["adapter"] = forced_adapter
+    return hook

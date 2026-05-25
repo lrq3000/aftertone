@@ -46,13 +46,25 @@ Environment:
 if ($Help) { Show-Help; exit 0 }
 
 function Ensure-Git {
+    # Git for Windows may not be on PATH when PowerShell is launched outside Git Bash.
+    # Prepend the two most common install locations so git.exe and bash.exe are
+    # discoverable regardless of the terminal host.
+    $gitRoots = @(
+        "${env:ProgramFiles}\Git",
+        "${env:ProgramFiles(x86)}\Git",
+        "${env:LOCALAPPDATA}\Programs\Git"
+    )
+    foreach ($root in $gitRoots) {
+        if (Test-Path (Join-Path $root "cmd\git.exe")) {
+            $env:Path = "$root\cmd;$root\bin;$env:Path"
+            break
+        }
+    }
+
     if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Error "install: git is required. Install Git for Windows: https://git-scm.com/download/win"
     }
-    $bash = @(
-        "${env:ProgramFiles}\Git\bin\bash.exe",
-        "${env:ProgramFiles(x86)}\Git\bin\bash.exe"
-    ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+    $bash = Get-Command bash -ErrorAction SilentlyContinue
     if (-not $bash) {
         Write-Error "install: Git Bash not found (needed for Cursor hooks). Reinstall Git for Windows."
     }
@@ -75,19 +87,31 @@ function Clone-OrUpdate {
     $gitEa = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
     if (Test-Path (Join-Path $dir ".git")) {
-        Write-Host "==> install: updating $dir ($Branch)…"
-        git -C $dir fetch origin $Branch --depth 1 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) { git -C $dir fetch origin $Branch 2>&1 | Out-Null }
-        git -C $dir checkout $Branch 2>&1 | Out-Null
-        git -C $dir pull --ff-only origin $Branch 2>&1 | Out-Null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "==> install: local changes or diverged history; resetting to origin/$Branch…"
-            git -C $dir fetch origin $Branch 2>&1 | Out-Null
-            git -C $dir reset --hard "origin/$Branch" 2>&1 | Out-Null
-            git -C $dir clean -fd 2>&1 | Out-Null
+        # When the install dir is a local dev clone that may have unpushed commits
+        # (e.g. -InstallDir C:\git\aftertone), skip the fetch/pull/reset cycle so
+        # the installer runs against the local code as-is.  We detect this by
+        # checking whether HEAD is ahead of origin/$Branch.
+        $ahead = git -C $dir rev-list --count "origin/$Branch..HEAD" 2>&1
+        $dirty = git -C $dir status --porcelain 2>&1
+        if (($LASTEXITCODE -eq 0) -and (($ahead -match '^\d+$' -and [int]$ahead -gt 0) -or $dirty)) {
+            Write-Host "==> install: using local repo at $dir ($Branch, $(git -C $dir log --oneline -1))"
+            Write-Host "==> install: local commits or changes detected; install runs from current HEAD (origin pull skipped)"
+        }
+        else {
+            Write-Host "==> install: updating $dir ($Branch)…"
+            git -C $dir fetch origin $Branch --depth 1 2>&1 | Out-Null
+            if ($LASTEXITCODE -ne 0) { git -C $dir fetch origin $Branch 2>&1 | Out-Null }
+            git -C $dir checkout $Branch 2>&1 | Out-Null
+            git -C $dir pull --ff-only origin $Branch 2>&1 | Out-Null
             if ($LASTEXITCODE -ne 0) {
-                $ErrorActionPreference = $gitEa
-                Write-Error "install: could not reset $dir to origin/$Branch"
+                Write-Host "==> install: local changes or diverged history; resetting to origin/$Branch…"
+                git -C $dir fetch origin $Branch 2>&1 | Out-Null
+                git -C $dir reset --hard "origin/$Branch" 2>&1 | Out-Null
+                git -C $dir clean -fd 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0) {
+                    $ErrorActionPreference = $gitEa
+                    Write-Error "install: could not reset $dir to origin/$Branch"
+                }
             }
         }
         $ErrorActionPreference = $gitEa
